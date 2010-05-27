@@ -1,9 +1,9 @@
 /**
- * Section 4.1.5, Page 55
-
+ *
  * skeleton of the Book-BuyerAgent class.
+ * 
  **/
-package com.cooperative.hotelreservation.buyer;
+package com.cooperative.hotelreservation.rent;
 
 import jade.core.*;
 import jade.core.behaviours.*;
@@ -25,15 +25,15 @@ import jade.content.onto.*;
 import jade.content.onto.basic.*;
 import com.cooperative.hotelreservation.ontology.*;
 
-public class BookBuyerAgent extends Agent {
+public class RoomRentAgent extends Agent {
 	// The list of known seller agents
 	private Vector sellerAgents = new Vector();
 
 	// The GUI to interact with the user
-	private BookBuyerGui myGui;
+	private RoomRentGui myGui;
 
 	/**
-	 * The following parts, where the SLCodec and BookTradingOntology are
+	 * The following parts, where the SLCodec and RoomTradingOntology are
 	 * registered, are explained in section 5.1.3.4 page 88 of the book.
 	 **/
 	private Codec codec = new SLCodec();
@@ -55,10 +55,10 @@ public class BookBuyerAgent extends Agent {
 		// Add the behaviour serving notifications from the external system
 		addBehaviour(new CyclicBehaviour(this) {
 			public void action() {
-				BookInfo info = (BookInfo) myAgent.getO2AObject();
+				RoomInfo info = (RoomInfo) myAgent.getO2AObject();
 				if (info != null) {
 					purchase(info.getTitle(), info.getMaxPrice(), info
-							.getDeadline());
+							.getDeadline(), info.getBedCount());
 				} else {
 					block();
 				}
@@ -66,7 +66,7 @@ public class BookBuyerAgent extends Agent {
 		});
 
 		// Printout a welcome message
-		System.out.println("Buyer-agent " + getAID().getName() + " is ready.");
+		System.out.println("Rent-agent " + getAID().getName() + " is ready.");
 
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
@@ -81,7 +81,7 @@ public class BookBuyerAgent extends Agent {
 		}
 
 		// Show the GUI to interact with the user
-		myGui = new BookBuyerGuiImpl();
+		myGui = new RoomRentGuiImpl();
 		myGui.setAgent(this);
 		myGui.show();
 
@@ -95,7 +95,7 @@ public class BookBuyerAgent extends Agent {
 				// Update the list of seller agents
 				DFAgentDescription template = new DFAgentDescription();
 				ServiceDescription sd = new ServiceDescription();
-				sd.setType("Book-selling");
+				sd.setType("Room-selling");
 				template.addServices(sd);
 				try {
 					DFAgentDescription[] result = DFService.search(myAgent,
@@ -128,15 +128,17 @@ public class BookBuyerAgent extends Agent {
 	 * This method is called by the GUI when the user inserts a new book to buy
 	 * 
 	 * @param title
-	 *            The title of the book to buy
+	 *            The title of the room to rent
 	 * @param maxPrice
-	 *            The maximum acceptable price to buy the book
+	 *            The maximum acceptable price to rent the room
 	 * @param deadline
-	 *            The deadline by which to buy the book
+	 *            The deadline by which to rent the room
+	 * @param bedCount
+	 *            The amount of rooms he want to rent
 	 **/
-	public void purchase(String title, int maxPrice, Date deadline) {
+	public void purchase(String title, int maxPrice, Date deadline, int bedCount) {
 		// the following line is in the book at page 62
-		addBehaviour(new PurchaseManager(this, title, maxPrice, deadline));
+		addBehaviour(new PurchaseManager(this, title, maxPrice, deadline, bedCount));
 	}
 
 	/**
@@ -151,12 +153,14 @@ public class BookBuyerAgent extends Agent {
 	private class PurchaseManager extends TickerBehaviour {
 		private String title;
 		private int maxPrice;
+		private int bedCount;
 		private long deadline, initTime, deltaT;
 
-		private PurchaseManager(Agent a, String t, int mp, Date d) {
+		private PurchaseManager(Agent a, String t, int mp, Date d, int bc) {
 			super(a, 60000); // tick every minute
 			title = t;
 			maxPrice = mp;
+			bedCount = bc;
 			deadline = d.getTime();
 			initTime = System.currentTimeMillis();
 			deltaT = deadline - initTime;
@@ -166,7 +170,7 @@ public class BookBuyerAgent extends Agent {
 			long currentTime = System.currentTimeMillis();
 			if (currentTime > deadline) {
 				// Deadline expired
-				myGui.notifyUser("Cannot buy book " + title);
+				myGui.notifyUser("Cannot rent room " + title);
 				stop();
 			} else {
 				// Compute the currently acceptable price and start a
@@ -174,7 +178,7 @@ public class BookBuyerAgent extends Agent {
 				long elapsedTime = currentTime - initTime;
 				int acceptablePrice = (int) Math.round(1.0 * maxPrice
 						* (1.0 * elapsedTime / deltaT));
-				myAgent.addBehaviour(new BookNegotiator(title, acceptablePrice,
+				myAgent.addBehaviour(new RoomNegotiator(title, acceptablePrice,
 						this));
 			}
 		}
@@ -184,18 +188,19 @@ public class BookBuyerAgent extends Agent {
 															// to the
 															// ContractNetInitiator
 															// constructor
-
+	
+	//TODO: Anpassen an Rooms
 	/**
 	 * Section 5.4.2 of the book, page 104 Inner class BookNegotiator. This is
 	 * the behaviour reimplemented by using the ContractNetInitiator
 	 **/
-	public class BookNegotiator extends ContractNetInitiator {
+	public class RoomNegotiator extends ContractNetInitiator {
 		private String title;
 		private int maxPrice;
 		private PurchaseManager manager;
 
-		public BookNegotiator(String t, int p, PurchaseManager m) {
-			super(BookBuyerAgent.this, cfp);
+		public RoomNegotiator(String t, int p, PurchaseManager m) {
+			super(RoomRentAgent.this, cfp);
 			title = t;
 			maxPrice = p;
 			manager = m;
@@ -203,11 +208,11 @@ public class BookBuyerAgent extends Agent {
 			book.setTitle(title);
 			Sell sellAction = new Sell();
 			sellAction.setItem(book);
-			Action act = new Action(BookBuyerAgent.this.getAID(), sellAction);
+			Action act = new Action(RoomRentAgent.this.getAID(), sellAction);
 			try {
 				cfp.setLanguage(codec.getName());
 				cfp.setOntology(ontology.getName());
-				BookBuyerAgent.this.getContentManager().fillContent(cfp, act);
+				RoomRentAgent.this.getContentManager().fillContent(cfp, act);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
