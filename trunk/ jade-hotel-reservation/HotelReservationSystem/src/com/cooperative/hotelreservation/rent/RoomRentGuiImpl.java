@@ -1,4 +1,4 @@
-package com.cooperative.hotelreservation.buyer;
+package com.cooperative.hotelreservation.rent;
 
 import jade.gui.TimeChooser;
 
@@ -10,20 +10,20 @@ import javax.swing.border.*;
 import java.util.Date;
 
 /**
- * J2SE (Swing-based) implementation of the GUI of the agent that tries to buy
- * books on behalf of its user
+ * J2SE (Swing-based) implementation of the GUI of the agent that tries to 
+ * rent rooms on behalf of its user
  */
-public class BookBuyerGuiImpl extends JFrame implements BookBuyerGui {
-	private BookBuyerAgent myAgent;
+public class RoomRentGuiImpl extends JFrame implements RoomRentGui {
+	private RoomRentAgent myAgent;
 
-	private JTextField titleTF, desiredCostTF, maxCostTF, deadlineTF;
+	private JTextField titleTF, desiredCostTF, maxCostTF, deadlineTF, bedCountTF;
 	private JButton setDeadlineB;
 	private JButton setCCB, buyB, resetB, exitB;
 	private JTextArea logTA;
 
 	private Date deadline;
 
-	public BookBuyerGuiImpl() {
+	public RoomRentGuiImpl() {
 		super();
 
 		addWindowListener(new WindowAdapter() {
@@ -40,7 +40,7 @@ public class BookBuyerGuiImpl extends JFrame implements BookBuyerGui {
 		// /////////
 		// Line 0
 		// /////////
-		JLabel l = new JLabel("Book to buy:");
+		JLabel l = new JLabel("Room to rent:");
 		l.setHorizontalAlignment(SwingConstants.LEFT);
 		GridBagConstraints gridBagConstraints = new GridBagConstraints();
 		gridBagConstraints.gridx = 0;
@@ -138,7 +138,7 @@ public class BookBuyerGuiImpl extends JFrame implements BookBuyerGui {
 					d = new Date();
 				}
 				TimeChooser tc = new TimeChooser(d);
-				if (tc.showEditTimeDlg(BookBuyerGuiImpl.this) == TimeChooser.OK) {
+				if (tc.showEditTimeDlg(RoomRentGuiImpl.this) == TimeChooser.OK) {
 					deadline = tc.getDate();
 					deadlineTF.setText(deadline.toString());
 				}
@@ -151,15 +151,43 @@ public class BookBuyerGuiImpl extends JFrame implements BookBuyerGui {
 		gridBagConstraints.insets = new Insets(5, 3, 0, 3);
 		rootPanel.add(setDeadlineB, gridBagConstraints);
 
+		// /////////
+		// Line 3
+		// /////////
+		
+		l = new JLabel("Amount of Beds:");
+		l.setHorizontalAlignment(SwingConstants.LEFT);
+		gridBagConstraints = new GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 3;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+		gridBagConstraints.insets = new java.awt.Insets(5, 3, 0, 3);
+		rootPanel.add(l, gridBagConstraints);
+
+		titleTF = new JTextField(64);
+		titleTF.setMinimumSize(new Dimension(222, 20));
+		titleTF.setPreferredSize(new Dimension(222, 20));
+		gridBagConstraints = new GridBagConstraints();
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 3;
+		gridBagConstraints.gridwidth = 3;
+		gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+		gridBagConstraints.insets = new Insets(5, 3, 0, 3);
+		rootPanel.add(titleTF, gridBagConstraints);
+		
+		// /////////
+		// Line 4
+		// /////////
+		
 		setCCB = new JButton("Set CreditCard");
 		setCCB.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String cc = JOptionPane.showInputDialog(BookBuyerGuiImpl.this,
+				String cc = JOptionPane.showInputDialog(RoomRentGuiImpl.this,
 						"Insert the Credit Card number");
 				if (cc != null && cc.length() > 0) {
 					myAgent.setCreditCard(cc);
 				} else {
-					JOptionPane.showMessageDialog(BookBuyerGuiImpl.this,
+					JOptionPane.showMessageDialog(RoomRentGuiImpl.this,
 							"Invalid Credit Card number", "WARNING",
 							JOptionPane.WARNING_MESSAGE);
 				}
@@ -169,7 +197,7 @@ public class BookBuyerGuiImpl extends JFrame implements BookBuyerGui {
 		// setCCB.setPreferredSize(new Dimension(70, 20));
 		gridBagConstraints = new GridBagConstraints();
 		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 3;
+		gridBagConstraints.gridy = 4;
 		gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
 		gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
 		gridBagConstraints.insets = new Insets(5, 3, 0, 3);
@@ -196,6 +224,8 @@ public class BookBuyerGuiImpl extends JFrame implements BookBuyerGui {
 				String title = titleTF.getText();
 				int desiredCost = -1;
 				int maxCost = -1;
+				int bedCount = -1;
+				
 				if (title != null && title.length() > 0) {
 					if (deadline != null
 							&& deadline.getTime() > System.currentTimeMillis()) {
@@ -204,10 +234,11 @@ public class BookBuyerGuiImpl extends JFrame implements BookBuyerGui {
 							// Integer.parseInt(desiredCostTF.getText());
 							try {
 								maxCost = Integer.parseInt(maxCostTF.getText());
+								bedCount = Integer.parseInt(bedCountTF.getText());
 								// if (maxCost >= desiredCost) {
 								// myAgent.purchase(title, desiredCost, maxCost,
 								// deadline.getTime());
-								myAgent.purchase(title, maxCost, deadline);
+								myAgent.purchase(title, maxCost, deadline, bedCount);
 								notifyUser("PUT FOR BUY: " + title + " at max "
 										+ maxCost + " by " + deadline);
 								// }
@@ -220,25 +251,25 @@ public class BookBuyerGuiImpl extends JFrame implements BookBuyerGui {
 							} catch (Exception ex1) {
 								// Invalid max cost
 								JOptionPane.showMessageDialog(
-										BookBuyerGuiImpl.this,
+										RoomRentGuiImpl.this,
 										"Invalid max cost", "WARNING",
 										JOptionPane.WARNING_MESSAGE);
 							}
 						} catch (Exception ex2) {
 							// Invalid desired cost
 							JOptionPane.showMessageDialog(
-									BookBuyerGuiImpl.this, "Invalid best cost",
+									RoomRentGuiImpl.this, "Invalid best cost",
 									"WARNING", JOptionPane.WARNING_MESSAGE);
 						}
 					} else {
 						// No deadline specified
-						JOptionPane.showMessageDialog(BookBuyerGuiImpl.this,
+						JOptionPane.showMessageDialog(RoomRentGuiImpl.this,
 								"Invalid deadline", "WARNING",
 								JOptionPane.WARNING_MESSAGE);
 					}
 				} else {
 					// No book title specified
-					JOptionPane.showMessageDialog(BookBuyerGuiImpl.this,
+					JOptionPane.showMessageDialog(RoomRentGuiImpl.this,
 							"No book title specified", "WARNING",
 							JOptionPane.WARNING_MESSAGE);
 				}
@@ -251,6 +282,7 @@ public class BookBuyerGuiImpl extends JFrame implements BookBuyerGui {
 				desiredCostTF.setText("");
 				maxCostTF.setText("");
 				deadlineTF.setText("");
+				bedCountTF.setText("");
 				deadline = null;
 			}
 		});
@@ -276,12 +308,20 @@ public class BookBuyerGuiImpl extends JFrame implements BookBuyerGui {
 		setResizable(false);
 	}
 
-	public void setAgent(BookBuyerAgent a) {
+	public void setAgent(RoomRentAgent a) {
 		myAgent = a;
 		setTitle(myAgent.getName());
 	}
 
 	public void notifyUser(String message) {
 		logTA.append(message + "\n");
+	}
+	
+	public void show() {
+		setVisible(true);
+	}
+	
+	public void hide() {
+		setVisible(false);
 	}
 }
