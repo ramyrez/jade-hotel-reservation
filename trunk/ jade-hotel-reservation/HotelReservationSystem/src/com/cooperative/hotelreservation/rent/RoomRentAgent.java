@@ -1,31 +1,35 @@
 /**
- *
  * skeleton of the Book-BuyerAgent class.
- * 
  **/
 package com.cooperative.hotelreservation.rent;
 
-import jade.core.*;
-import jade.core.behaviours.*;
-import jade.lang.acl.*;
-
-import jade.domain.*;
-import jade.domain.FIPAAgentManagement.*;
-
+import jade.content.ContentElementList;
+import jade.content.lang.Codec;
+import jade.content.lang.sl.SLCodec;
+import jade.content.onto.Ontology;
+import jade.content.onto.basic.Action;
+import jade.core.AID;
+import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.TickerBehaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAException;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
 import jade.proto.ContractNetInitiator;
 
-import java.util.Vector;
 import java.util.Date;
+import java.util.Vector;
 
-import jade.content.*;
-import jade.content.lang.Codec;
-import jade.content.lang.Codec.CodecException;
-import jade.content.lang.sl.SLCodec;
-import jade.content.onto.*;
-import jade.content.onto.basic.*;
-import com.cooperative.hotelreservation.ontology.*;
+import com.cooperative.hotelreservation.ontology.Book;
+import com.cooperative.hotelreservation.ontology.BookTradingOntology;
+import com.cooperative.hotelreservation.ontology.Costs;
+import com.cooperative.hotelreservation.ontology.Sell;
 
-public class RoomRentAgent extends Agent {
+public class RoomRentAgent extends Agent
+{
+
 	// The list of known seller agents
 	private Vector sellerAgents = new Vector();
 
@@ -42,7 +46,8 @@ public class RoomRentAgent extends Agent {
 	/**
 	 * Agent initializations
 	 **/
-	protected void setup() {
+	protected void setup()
+	{
 
 		/**
 		 * The following piece of code is explained in section 5.6.1 pag. 113 of
@@ -53,13 +58,17 @@ public class RoomRentAgent extends Agent {
 		// Enable O2A Communication
 		setEnabledO2ACommunication(true, 0);
 		// Add the behaviour serving notifications from the external system
-		addBehaviour(new CyclicBehaviour(this) {
-			public void action() {
+		addBehaviour(new CyclicBehaviour(this)
+		{
+			public void action()
+			{
 				RoomInfo info = (RoomInfo) myAgent.getO2AObject();
-				if (info != null) {
-					purchase(info.getTitle(), info.getMaxPrice(), info
-							.getDeadline(), info.getBedCount());
-				} else {
+				if (info != null)
+				{
+					purchase(info.getTitle(), info.getMaxPrice(), info.getDeadline(), info.getBedCount());
+				}
+				else
+				{
 					block();
 				}
 			}
@@ -73,15 +82,17 @@ public class RoomRentAgent extends Agent {
 
 		// Get names of seller agents as arguments
 		Object[] args = getArguments();
-		if (args != null && args.length > 0) {
-			for (int i = 0; i < args.length; ++i) {
+		if (args != null && args.length > 0)
+		{
+			for (int i = 0; i < args.length; ++i)
+			{
 				AID seller = new AID((String) args[i], AID.ISLOCALNAME);
 				sellerAgents.addElement(seller);
 			}
 		}
 
 		// Show the GUI to interact with the user
-		myGui = new RoomRentGuiImpl();
+		myGui = new RoomRentGui();
 		myGui.setAgent(this);
 		myGui.show();
 
@@ -90,21 +101,25 @@ public class RoomRentAgent extends Agent {
 		 * the book in section 4.4.3, page 74
 		 **/
 		// Update the list of seller agents every minute
-		addBehaviour(new TickerBehaviour(this, 60000) {
-			protected void onTick() {
+		addBehaviour(new TickerBehaviour(this, 60000)
+		{
+			protected void onTick()
+			{
 				// Update the list of seller agents
 				DFAgentDescription template = new DFAgentDescription();
 				ServiceDescription sd = new ServiceDescription();
 				sd.setType("Room-selling");
 				template.addServices(sd);
-				try {
-					DFAgentDescription[] result = DFService.search(myAgent,
-							template);
+				try
+				{
+					DFAgentDescription[] result = DFService.search(myAgent, template);
 					sellerAgents.clear();
-					for (int i = 0; i < result.length; ++i) {
+					for (int i = 0; i < result.length; ++i)
+					{
 						sellerAgents.addElement(result[i].getName());
 					}
-				} catch (FIPAException fe) {
+				} catch (FIPAException fe)
+				{
 					fe.printStackTrace();
 				}
 			}
@@ -114,9 +129,11 @@ public class RoomRentAgent extends Agent {
 	/**
 	 * Agent clean-up
 	 **/
-	protected void takeDown() {
+	protected void takeDown()
+	{
 		// Dispose the GUI if it is there
-		if (myGui != null) {
+		if (myGui != null)
+		{
 			myGui.dispose();
 		}
 
@@ -126,37 +143,42 @@ public class RoomRentAgent extends Agent {
 
 	/**
 	 * This method is called by the GUI when the user inserts a new book to buy
-	 * 
-	 * @param title
-	 *            The title of the room to rent
-	 * @param maxPrice
-	 *            The maximum acceptable price to rent the room
-	 * @param deadline
-	 *            The deadline by which to rent the room
-	 * @param bedCount
-	 *            The amount of rooms he want to rent
+	 * @param title The title of the room to rent
+	 * @param maxPrice The maximum acceptable price to rent the room
+	 * @param deadline The deadline by which to rent the room
+	 * @param bedCount The amount of rooms he want to rent
 	 **/
-	public void purchase(String title, int maxPrice, Date deadline, int bedCount) {
+	@Deprecated
+	public void purchase(String title, int maxPrice, Date deadline, int bedCount)
+	{
 		// the following line is in the book at page 62
 		addBehaviour(new PurchaseManager(this, title, maxPrice, deadline, bedCount));
+	}
+
+	public void purchase(RoomInfo roomInfo, double maxPrice, Date deadline)
+	{
+		addBehaviour(new PurchaseManager(this, roomInfo, maxPrice, deadline));
 	}
 
 	/**
 	 * This method is called by the GUI. At the moment it is not implemented.
 	 **/
-	public void setCreditCard(String creditCarNumber) {
+	public void setCreditCard(String creditCarNumber)
+	{
 	}
 
 	/**
 	 * Section 4.2.4, Page 62
 	 **/
-	private class PurchaseManager extends TickerBehaviour {
+	private class PurchaseManager extends TickerBehaviour
+	{
 		private String title;
 		private int maxPrice;
 		private int bedCount;
 		private long deadline, initTime, deltaT;
 
-		private PurchaseManager(Agent a, String t, int mp, Date d, int bc) {
+		private PurchaseManager(Agent a, String t, int mp, Date d, int bc)
+		{
 			super(a, 60000); // tick every minute
 			title = t;
 			maxPrice = mp;
@@ -166,40 +188,50 @@ public class RoomRentAgent extends Agent {
 			deltaT = deadline - initTime;
 		}
 
-		public void onTick() {
+		public PurchaseManager(RoomRentAgent roomRentAgent, RoomInfo roomInfo, double maxPrice, Date deadline)
+		{
+			super(roomRentAgent, 60000);
+		}
+
+		public void onTick()
+		{
 			long currentTime = System.currentTimeMillis();
-			if (currentTime > deadline) {
+			if (currentTime > deadline)
+			{
 				// Deadline expired
 				myGui.notifyUser("Cannot rent room " + title);
 				stop();
-			} else {
+			}
+			else
+			{
 				// Compute the currently acceptable price and start a
 				// negotiation
 				long elapsedTime = currentTime - initTime;
-				int acceptablePrice = (int) Math.round(1.0 * maxPrice
-						* (1.0 * elapsedTime / deltaT));
-				myAgent.addBehaviour(new RoomNegotiator(title, acceptablePrice,
-						this));
+				int acceptablePrice = (int) Math.round(1.0 * maxPrice * (1.0 * elapsedTime / deltaT));
+				myAgent.addBehaviour(new RoomNegotiator(title, acceptablePrice, this));
 			}
 		}
 	}
 
 	public ACLMessage cfp = new ACLMessage(ACLMessage.CFP); // variable needed
-															// to the
-															// ContractNetInitiator
-															// constructor
-	
-	//TODO: Anpassen an Rooms
+
+	// to the
+	// ContractNetInitiator
+	// constructor
+
+	// TODO: Anpassen an Rooms
 	/**
 	 * Section 5.4.2 of the book, page 104 Inner class BookNegotiator. This is
 	 * the behaviour reimplemented by using the ContractNetInitiator
 	 **/
-	public class RoomNegotiator extends ContractNetInitiator {
+	public class RoomNegotiator extends ContractNetInitiator
+	{
 		private String title;
 		private int maxPrice;
 		private PurchaseManager manager;
 
-		public RoomNegotiator(String t, int p, PurchaseManager m) {
+		public RoomNegotiator(String t, int p, PurchaseManager m)
+		{
 			super(RoomRentAgent.this, cfp);
 			title = t;
 			maxPrice = p;
@@ -209,63 +241,71 @@ public class RoomRentAgent extends Agent {
 			Sell sellAction = new Sell();
 			sellAction.setItem(book);
 			Action act = new Action(RoomRentAgent.this.getAID(), sellAction);
-			try {
+			try
+			{
 				cfp.setLanguage(codec.getName());
 				cfp.setOntology(ontology.getName());
 				RoomRentAgent.this.getContentManager().fillContent(cfp, act);
-			} catch (Exception e) {
+			} catch (Exception e)
+			{
 				e.printStackTrace();
 			}
 		}
 
-		protected Vector prepareCfps(ACLMessage cfp) {
+		protected Vector prepareCfps(ACLMessage cfp)
+		{
 			cfp.clearAllReceiver();
-			for (int i = 0; i < sellerAgents.size(); ++i) {
+			for (int i = 0; i < sellerAgents.size(); ++i)
+			{
 				cfp.addReceiver((AID) sellerAgents.get(i));
 			}
 			Vector v = new Vector();
 			v.add(cfp);
 			if (sellerAgents.size() > 0)
-				myGui.notifyUser("Sent Call for Proposal to "
-						+ sellerAgents.size() + " sellers.");
+				myGui.notifyUser("Sent Call for Proposal to " + sellerAgents.size() + " sellers.");
 			return v;
 		}
 
-		protected void handleAllResponses(Vector responses, Vector acceptances) {
+		protected void handleAllResponses(Vector responses, Vector acceptances)
+		{
 			ACLMessage bestOffer = null;
 			int bestPrice = -1;
-			for (int i = 0; i < responses.size(); i++) {
+			for (int i = 0; i < responses.size(); i++)
+			{
 				ACLMessage rsp = (ACLMessage) responses.get(i);
-				if (rsp.getPerformative() == ACLMessage.PROPOSE) {
-					try {
-						ContentElementList cel = (ContentElementList) myAgent
-								.getContentManager().extractContent(rsp);
+				if (rsp.getPerformative() == ACLMessage.PROPOSE)
+				{
+					try
+					{
+						ContentElementList cel = (ContentElementList) myAgent.getContentManager().extractContent(rsp);
 						int price = ((Costs) cel.get(1)).getPrice();
-						myGui.notifyUser("Received Proposal at " + price
-								+ " when maximum acceptable price was "
+						myGui.notifyUser("Received Proposal at " + price + " when maximum acceptable price was "
 								+ maxPrice);
-						if (bestOffer == null || price < bestPrice) {
+						if (bestOffer == null || price < bestPrice)
+						{
 							bestOffer = rsp;
 							bestPrice = price;
 						}
-					} catch (Exception e) {
+					} catch (Exception e)
+					{
 						e.printStackTrace();
 					}
 				}
 			}
 
-			for (int i = 0; i < responses.size(); i++) {
+			for (int i = 0; i < responses.size(); i++)
+			{
 				ACLMessage rsp = (ACLMessage) responses.get(i);
 				ACLMessage accept = rsp.createReply();
-				if (rsp == bestOffer) {
+				if (rsp == bestOffer)
+				{
 					boolean acceptedProposal = (bestPrice <= maxPrice);
-					accept
-							.setPerformative(acceptedProposal ? ACLMessage.ACCEPT_PROPOSAL
-									: ACLMessage.REJECT_PROPOSAL);
+					accept.setPerformative(acceptedProposal ? ACLMessage.ACCEPT_PROPOSAL : ACLMessage.REJECT_PROPOSAL);
 					accept.setContent(title);
-					myGui.notifyUser(acceptedProposal ? "sent Accept Proposal"
-							: "sent Reject Proposal");
-				} else {
+					myGui.notifyUser(acceptedProposal ? "sent Accept Proposal" : "sent Reject Proposal");
+				}
+				else
+				{
 					accept.setPerformative(ACLMessage.REJECT_PROPOSAL);
 				}
 				// System.out.println(myAgent.getLocalName()+" handleAllResponses.acceptances.add "+accept);
@@ -273,11 +313,11 @@ public class RoomRentAgent extends Agent {
 			}
 		}
 
-		protected void handleInform(ACLMessage inform) {
+		protected void handleInform(ACLMessage inform)
+		{
 			// Book successfully purchased
 			int price = Integer.parseInt(inform.getContent());
-			myGui.notifyUser("Book " + title
-					+ " successfully purchased. Price =" + price);
+			myGui.notifyUser("Book " + title + " successfully purchased. Price =" + price);
 			manager.stop();
 		}
 
