@@ -10,10 +10,11 @@ import javax.swing.border.*;
 import java.util.Date;
 
 /**
- * J2SE (Swing-based) implementation of the GUI of the agent that tries to 
- * rent rooms on behalf of its user
+ * J2SE (Swing-based) implementation of the GUI of the agent that tries to rent
+ * rooms on behalf of its user
  */
-public class RoomRentGuiImpl extends JFrame implements RoomRentGui {
+public class RoomRentGuiImpl extends JFrame implements RoomRentGui
+{
 	private RoomRentAgent myAgent;
 
 	private JTextField titleTF, desiredCostTF, maxCostTF, deadlineTF, bedCountTF;
@@ -23,11 +24,14 @@ public class RoomRentGuiImpl extends JFrame implements RoomRentGui {
 
 	private Date deadline;
 
-	public RoomRentGuiImpl() {
+	public RoomRentGuiImpl()
+	{
 		super();
 
-		addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
+		addWindowListener(new WindowAdapter()
+		{
+			public void windowClosing(WindowEvent e)
+			{
 				myAgent.doDelete();
 			}
 		});
@@ -131,14 +135,18 @@ public class RoomRentGuiImpl extends JFrame implements RoomRentGui {
 		setDeadlineB = new JButton("Set");
 		setDeadlineB.setMinimumSize(new Dimension(70, 20));
 		setDeadlineB.setPreferredSize(new Dimension(70, 20));
-		setDeadlineB.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		setDeadlineB.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
 				Date d = deadline;
-				if (d == null) {
+				if (d == null)
+				{
 					d = new Date();
 				}
 				TimeChooser tc = new TimeChooser(d);
-				if (tc.showEditTimeDlg(RoomRentGuiImpl.this) == TimeChooser.OK) {
+				if (tc.showEditTimeDlg(RoomRentGuiImpl.this) == TimeChooser.OK)
+				{
 					deadline = tc.getDate();
 					deadlineTF.setText(deadline.toString());
 				}
@@ -154,7 +162,7 @@ public class RoomRentGuiImpl extends JFrame implements RoomRentGui {
 		// /////////
 		// Line 3
 		// /////////
-		
+
 		l = new JLabel("Amount of Beds:");
 		l.setHorizontalAlignment(SwingConstants.LEFT);
 		gridBagConstraints = new GridBagConstraints();
@@ -174,21 +182,24 @@ public class RoomRentGuiImpl extends JFrame implements RoomRentGui {
 		gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
 		gridBagConstraints.insets = new Insets(5, 3, 0, 3);
 		rootPanel.add(titleTF, gridBagConstraints);
-		
+
 		// /////////
 		// Line 4
 		// /////////
-		
+
 		setCCB = new JButton("Set CreditCard");
-		setCCB.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String cc = JOptionPane.showInputDialog(RoomRentGuiImpl.this,
-						"Insert the Credit Card number");
-				if (cc != null && cc.length() > 0) {
+		setCCB.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				String cc = JOptionPane.showInputDialog(RoomRentGuiImpl.this, "Insert the Credit Card number");
+				if (cc != null && cc.length() > 0)
+				{
 					myAgent.setCreditCard(cc);
-				} else {
-					JOptionPane.showMessageDialog(RoomRentGuiImpl.this,
-							"Invalid Credit Card number", "WARNING",
+				}
+				else
+				{
+					JOptionPane.showMessageDialog(RoomRentGuiImpl.this, "Invalid Credit Card number", "WARNING",
 							JOptionPane.WARNING_MESSAGE);
 				}
 			}
@@ -219,28 +230,32 @@ public class RoomRentGuiImpl extends JFrame implements RoomRentGui {
 
 		p = new JPanel();
 		buyB = new JButton("Buy");
-		buyB.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		buyB.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
 				String title = titleTF.getText();
 				int desiredCost = -1;
 				int maxCost = -1;
 				int bedCount = -1;
-				
-				if (title != null && title.length() > 0) {
-					if (deadline != null
-							&& deadline.getTime() > System.currentTimeMillis()) {
-						try {
+
+				if (title != null && title.length() > 0)
+				{
+					if (deadline != null && deadline.getTime() > System.currentTimeMillis())
+					{
+						try
+						{
 							// desiredCost =
 							// Integer.parseInt(desiredCostTF.getText());
-							try {
+							try
+							{
 								maxCost = Integer.parseInt(maxCostTF.getText());
 								bedCount = Integer.parseInt(bedCountTF.getText());
 								// if (maxCost >= desiredCost) {
 								// myAgent.purchase(title, desiredCost, maxCost,
 								// deadline.getTime());
 								myAgent.purchase(title, maxCost, deadline, bedCount);
-								notifyUser("PUT FOR BUY: " + title + " at max "
-										+ maxCost + " by " + deadline);
+								notifyUser("PUT FOR BUY: " + title + " at max " + maxCost + " by " + deadline);
 								// }
 								// else {
 								// Max cost < desiredCost
@@ -248,36 +263,39 @@ public class RoomRentGuiImpl extends JFrame implements RoomRentGui {
 								// "Max cost must be greater than best cost",
 								// "WARNING", JOptionPane.WARNING_MESSAGE);
 								// }
-							} catch (Exception ex1) {
+							} catch (Exception ex1)
+							{
 								// Invalid max cost
-								JOptionPane.showMessageDialog(
-										RoomRentGuiImpl.this,
-										"Invalid max cost", "WARNING",
+								JOptionPane.showMessageDialog(RoomRentGuiImpl.this, "Invalid max cost", "WARNING",
 										JOptionPane.WARNING_MESSAGE);
 							}
-						} catch (Exception ex2) {
+						} catch (Exception ex2)
+						{
 							// Invalid desired cost
-							JOptionPane.showMessageDialog(
-									RoomRentGuiImpl.this, "Invalid best cost",
-									"WARNING", JOptionPane.WARNING_MESSAGE);
+							JOptionPane.showMessageDialog(RoomRentGuiImpl.this, "Invalid best cost", "WARNING",
+									JOptionPane.WARNING_MESSAGE);
 						}
-					} else {
+					}
+					else
+					{
 						// No deadline specified
-						JOptionPane.showMessageDialog(RoomRentGuiImpl.this,
-								"Invalid deadline", "WARNING",
+						JOptionPane.showMessageDialog(RoomRentGuiImpl.this, "Invalid deadline", "WARNING",
 								JOptionPane.WARNING_MESSAGE);
 					}
-				} else {
+				}
+				else
+				{
 					// No book title specified
-					JOptionPane.showMessageDialog(RoomRentGuiImpl.this,
-							"No book title specified", "WARNING",
+					JOptionPane.showMessageDialog(RoomRentGuiImpl.this, "No book title specified", "WARNING",
 							JOptionPane.WARNING_MESSAGE);
 				}
 			}
 		});
 		resetB = new JButton("Reset");
-		resetB.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		resetB.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
 				titleTF.setText("");
 				desiredCostTF.setText("");
 				maxCostTF.setText("");
@@ -287,8 +305,10 @@ public class RoomRentGuiImpl extends JFrame implements RoomRentGui {
 			}
 		});
 		exitB = new JButton("Exit");
-		exitB.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		exitB.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
 				myAgent.doDelete();
 			}
 		});
@@ -308,20 +328,24 @@ public class RoomRentGuiImpl extends JFrame implements RoomRentGui {
 		setResizable(false);
 	}
 
-	public void setAgent(RoomRentAgent a) {
+	public void setAgent(RoomRentAgent a)
+	{
 		myAgent = a;
 		setTitle(myAgent.getName());
 	}
 
-	public void notifyUser(String message) {
+	public void notifyUser(String message)
+	{
 		logTA.append(message + "\n");
 	}
-	
-	public void show() {
+
+	public void show()
+	{
 		setVisible(true);
 	}
-	
-	public void hide() {
+
+	public void hide()
+	{
 		setVisible(false);
 	}
 }
