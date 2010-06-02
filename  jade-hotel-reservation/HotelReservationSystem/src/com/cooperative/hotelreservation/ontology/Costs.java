@@ -1,31 +1,36 @@
 /**
- * Section 5.1.3.2 Page 85
- * Java class representing a Costs
+ * Section 5.1.3.2 Page 85 Java class representing a Costs
  **/
 
-// Class associated to the COSTS schema
 package com.cooperative.hotelreservation.ontology;
 
 import jade.content.Predicate;
-import jade.core.AID;
 
-public class Costs implements Predicate {
-	private Book item;
+import com.cooperative.hotelreservation.rent.RoomInfo;
+
+public class Costs implements Predicate
+{
+
+	private RoomInfo roomInfo;
 	private int price;
 
-	public Book getItem() {
-		return item;
+	public void setRoomInfo(RoomInfo roomInfo)
+	{
+		this.roomInfo = roomInfo;
 	}
 
-	public void setItem(Book item) {
-		this.item = item;
+	public RoomInfo getRoomInfo()
+	{
+		return roomInfo;
 	}
 
-	public int getPrice() {
+	public int getPrice()
+	{
 		return price;
 	}
 
-	public void setPrice(int price) {
+	public void setPrice(int price)
+	{
 		this.price = price;
 	}
 }
