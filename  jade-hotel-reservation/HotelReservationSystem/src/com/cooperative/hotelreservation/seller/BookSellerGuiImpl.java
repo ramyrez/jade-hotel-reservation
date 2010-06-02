@@ -2,18 +2,34 @@ package com.cooperative.hotelreservation.seller;
 
 import jade.gui.TimeChooser;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.border.*;
-
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Date;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.border.BevelBorder;
 
 /**
  * This is the GUI of the agent that tries to sell books on behalf of its user
  */
-public class BookSellerGuiImpl extends JFrame implements BookSellerGui {
-	private BookSellerAgent myAgent;
+public class BookSellerGuiImpl extends JFrame
+{
+	private RoomSellerAgent myAgent;
 
 	private JTextField titleTF, desiredPriceTF, minPriceTF, deadlineTF;
 	private JButton setDeadlineB;
@@ -22,16 +38,20 @@ public class BookSellerGuiImpl extends JFrame implements BookSellerGui {
 
 	private Date deadline;
 
-	public void setAgent(BookSellerAgent a) {
+	public void setAgent(RoomSellerAgent a)
+	{
 		myAgent = a;
 		setTitle(myAgent.getName());
 	}
 
-	public BookSellerGuiImpl() {
+	public BookSellerGuiImpl()
+	{
 		super();
 
-		addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
+		addWindowListener(new WindowAdapter()
+		{
+			public void windowClosing(WindowEvent e)
+			{
 				myAgent.doDelete();
 			}
 		});
@@ -134,14 +154,18 @@ public class BookSellerGuiImpl extends JFrame implements BookSellerGui {
 		setDeadlineB = new JButton("Set");
 		setDeadlineB.setMinimumSize(new Dimension(70, 20));
 		setDeadlineB.setPreferredSize(new Dimension(70, 20));
-		setDeadlineB.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		setDeadlineB.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
 				Date d = deadline;
-				if (d == null) {
+				if (d == null)
+				{
 					d = new Date();
 				}
 				TimeChooser tc = new TimeChooser(d);
-				if (tc.showEditTimeDlg(BookSellerGuiImpl.this) == TimeChooser.OK) {
+				if (tc.showEditTimeDlg(BookSellerGuiImpl.this) == TimeChooser.OK)
+				{
 					deadline = tc.getDate();
 					deadlineTF.setText(deadline.toString());
 				}
@@ -170,70 +194,70 @@ public class BookSellerGuiImpl extends JFrame implements BookSellerGui {
 
 		p = new JPanel();
 		sellB = new JButton("Sell");
-		sellB.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		sellB.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
 				String title = titleTF.getText();
 				int desiredPrice = -1;
 				int minPrice = -1;
-				if (title != null && title.length() > 0) {
-					if (deadline != null
-							&& deadline.getTime() > System.currentTimeMillis()) {
-						try {
-							desiredPrice = Integer.parseInt(desiredPriceTF
-									.getText());
-							try {
-								minPrice = Integer.parseInt(minPriceTF
-										.getText());
-								if (minPrice <= desiredPrice) {
-									// myAgent.addToCatalogue(title,
-									// desiredPrice, minPrice,
-									// deadline.getTime());
-									myAgent.putForSale(title, desiredPrice,
-											minPrice, deadline);
-									notifyUser("PUT FOR SALE: " + title
-											+ " between " + desiredPrice
-											+ " and " + minPrice + " by "
-											+ deadline);
-								} else {
-									// minPrice > desiredPrice
-									JOptionPane
-											.showMessageDialog(
-													BookSellerGuiImpl.this,
-													"Min price must be cheaper than best price",
-													"WARNING",
-													JOptionPane.WARNING_MESSAGE);
+				if (title != null && title.length() > 0)
+				{
+					if (deadline != null && deadline.getTime() > System.currentTimeMillis())
+					{
+						try
+						{
+							desiredPrice = Integer.parseInt(desiredPriceTF.getText());
+							try
+							{
+								minPrice = Integer.parseInt(minPriceTF.getText());
+								if (minPrice <= desiredPrice)
+								{
+
+									myAgent.addNewRoom(title, desiredPrice, minPrice, deadline);
+									notifyUser("PUT FOR SALE: " + title + " between " + desiredPrice + " and "
+											+ minPrice + " by " + deadline);
 								}
-							} catch (Exception ex1) {
+								else
+								{
+									// minPrice > desiredPrice
+									JOptionPane.showMessageDialog(BookSellerGuiImpl.this,
+											"Min price must be cheaper than best price", "WARNING",
+											JOptionPane.WARNING_MESSAGE);
+								}
+							} catch (Exception ex1)
+							{
 								// Invalid max cost
-								JOptionPane.showMessageDialog(
-										BookSellerGuiImpl.this,
-										"Invalid min price", "WARNING",
+								JOptionPane.showMessageDialog(BookSellerGuiImpl.this, "Invalid min price", "WARNING",
 										JOptionPane.WARNING_MESSAGE);
 							}
-						} catch (Exception ex2) {
+						} catch (Exception ex2)
+						{
 							// Invalid desired cost
-							JOptionPane.showMessageDialog(
-									BookSellerGuiImpl.this,
-									"Invalid best price", "WARNING",
+							JOptionPane.showMessageDialog(BookSellerGuiImpl.this, "Invalid best price", "WARNING",
 									JOptionPane.WARNING_MESSAGE);
 						}
-					} else {
+					}
+					else
+					{
 						// No deadline specified
-						JOptionPane.showMessageDialog(BookSellerGuiImpl.this,
-								"Invalid deadline", "WARNING",
+						JOptionPane.showMessageDialog(BookSellerGuiImpl.this, "Invalid deadline", "WARNING",
 								JOptionPane.WARNING_MESSAGE);
 					}
-				} else {
+				}
+				else
+				{
 					// No book title specified
-					JOptionPane.showMessageDialog(BookSellerGuiImpl.this,
-							"No book title specified", "WARNING",
+					JOptionPane.showMessageDialog(BookSellerGuiImpl.this, "No book title specified", "WARNING",
 							JOptionPane.WARNING_MESSAGE);
 				}
 			}
 		});
 		resetB = new JButton("Reset");
-		resetB.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		resetB.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
 				titleTF.setText("");
 				desiredPriceTF.setText("");
 				minPriceTF.setText("");
@@ -242,8 +266,10 @@ public class BookSellerGuiImpl extends JFrame implements BookSellerGui {
 			}
 		});
 		exitB = new JButton("Exit");
-		exitB.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		exitB.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
 				myAgent.doDelete();
 			}
 		});
@@ -263,7 +289,8 @@ public class BookSellerGuiImpl extends JFrame implements BookSellerGui {
 		setResizable(false);
 	}
 
-	public void notifyUser(String message) {
+	public void notifyUser(String message)
+	{
 		logTA.append(message + "\n");
 	}
 }
