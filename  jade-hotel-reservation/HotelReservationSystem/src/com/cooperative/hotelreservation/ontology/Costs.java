@@ -11,17 +11,17 @@ import com.cooperative.hotelreservation.rent.RoomInfo;
 public class Costs implements Predicate
 {
 
-	private RoomInfo roomInfo;
 	private int price;
+	private Room item;
 
-	public void setRoomInfo(RoomInfo roomInfo)
+	public void setItem(Room item)
 	{
-		this.roomInfo = roomInfo;
+		this.item = item;
 	}
 
-	public RoomInfo getRoomInfo()
+	public Room getItem()
 	{
-		return roomInfo;
+		return item;
 	}
 
 	public int getPrice()

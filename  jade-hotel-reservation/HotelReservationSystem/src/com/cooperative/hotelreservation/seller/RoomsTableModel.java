@@ -1,11 +1,12 @@
 package com.cooperative.hotelreservation.seller;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
-import com.cooperative.hotelreservation.rent.RoomInfo;
+import com.cooperative.hotelreservation.ontology.Room;
 
 public class RoomsTableModel extends AbstractTableModel
 {
@@ -14,7 +15,7 @@ public class RoomsTableModel extends AbstractTableModel
 			"ready for sale" };
 
 	private final List<Boolean> readyForSaleList;
-	private final List<RoomInfo> roomInfos;
+	private final List<Room> rooms;
 	private final List<Double> prices;
 
 	private final RoomSellerAgent roomSellerAgent;
@@ -25,17 +26,17 @@ public class RoomsTableModel extends AbstractTableModel
 
 		this.roomSellerAgent = roomSellerAgent;
 
-		roomInfos = new LinkedList<RoomInfo>();
+		rooms = new LinkedList<Room>();
 		prices = new LinkedList<Double>();
 		readyForSaleList = new LinkedList<Boolean>();
 	}
 
 	public void addNewRoom()
 	{
-		roomInfos.add(new RoomInfo());
+		rooms.add(new Room());
 		prices.add(new Double(0.0D));
 		readyForSaleList.add(Boolean.FALSE);
-		fireTableRowsInserted(roomInfos.size() - 1, roomInfos.size() - 1);
+		fireTableRowsInserted(rooms.size() - 1, rooms.size() - 1);
 	}
 
 	@Override
@@ -70,7 +71,7 @@ public class RoomsTableModel extends AbstractTableModel
 	@Override
 	public int getRowCount()
 	{
-		return roomInfos.size();
+		return rooms.size();
 	}
 
 	@Override
@@ -79,9 +80,9 @@ public class RoomsTableModel extends AbstractTableModel
 		switch (columnIndex)
 		{
 			case 0:
-				return roomInfos.get(rowIndex).getBedCount();
+				return rooms.get(rowIndex).getBedCount();
 			case 1:
-				return roomInfos.get(rowIndex).getHasShower();
+				return rooms.get(rowIndex).getHasShower();
 			case 2:
 				return prices.get(rowIndex);
 			case 3:
@@ -102,10 +103,10 @@ public class RoomsTableModel extends AbstractTableModel
 
 	public void removeRow(int row)
 	{
-		if (row <= 0)
+		if (row < 0)
 			return;
 
-		roomInfos.remove(row);
+		rooms.remove(row);
 		prices.remove(row);
 		readyForSaleList.remove(row);
 		fireTableRowsDeleted(row, row);
@@ -119,11 +120,11 @@ public class RoomsTableModel extends AbstractTableModel
 		{
 			case 0:
 				int val = ((Integer) aValue).intValue();
-				roomInfos.get(rowIndex).setBedCount(val);
+				rooms.get(rowIndex).setBedCount(val);
 				break;
 			case 1:
 				Boolean bool = (Boolean) aValue;
-				roomInfos.get(rowIndex).setHasShower(bool.booleanValue());
+				rooms.get(rowIndex).setHasShower(bool.booleanValue());
 				break;
 			case 2:
 				Double doubleVal = (Double) aValue;
@@ -131,7 +132,12 @@ public class RoomsTableModel extends AbstractTableModel
 				break;
 			case 3:
 				readyForSaleList.set(rowIndex, Boolean.TRUE);
-				// TODO inform agent for a new ready for sale room
+
+				Room room = rooms.get(rowIndex);
+				Double price = prices.get(rowIndex);
+				long now = new Date().getTime() + (5 * 60 * 1000);
+				roomSellerAgent.addNewRoomForRent(room, price.intValue() + 10, price.intValue(), new Date(now));
+
 				break;
 		}
 	}

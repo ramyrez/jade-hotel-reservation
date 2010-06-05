@@ -13,10 +13,9 @@ import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.swing.*;
-
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -25,6 +24,8 @@ import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.SpinnerNumberModel;
+
+import com.cooperative.hotelreservation.ontology.Room;
 
 public class RoomRentGui extends JFrame
 {
@@ -56,14 +57,15 @@ public class RoomRentGui extends JFrame
 				double maxPrice = (Double) maximumPriceSpinner.getValue();
 				Date deadline = (Date) deadlineTextField.getValue();
 
-				// a check for valid properties is obsolete ... so we can
-				// directly inform the room rent agent for a new offer to search
-				// for
-				// TODO roomRentAgent.purchase(null, (int) maxPrice, deadline,
-				// numOfBeds);
+				Room room = new Room();
+				room.setBedCount(numOfBeds);
+				room.setHasShower(hasShower);
+
+				roomRentAgent.purchase(room, (int) maxPrice, deadline);
 			}
 		});
 
+		setTitle("Search for rooms");
 		setSize(350, 320);
 	}
 
@@ -189,7 +191,6 @@ public class RoomRentGui extends JFrame
 	private JFormattedTextField deadlineTextField;
 	private JButton lookForOfferButton;
 	private JTextArea logTextArea;
-
 	// JFormDesigner - End of variables declaration //GEN-END:variables
 
 	public void setAgent(RoomRentAgent roomRentAgent)
@@ -204,7 +205,7 @@ public class RoomRentGui extends JFrame
 			logTextArea.append("\n");
 		logTextArea.append(message);
 
-		// scroll to last pos
+		// scroll to last position
 		logTextArea.setCaretPosition(logTextArea.getText().length() - 1);
 	}
 }

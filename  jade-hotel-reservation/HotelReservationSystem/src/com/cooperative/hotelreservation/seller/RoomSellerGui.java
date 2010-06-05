@@ -24,13 +24,11 @@ public class RoomSellerGui extends JFrame
 	private RoomsTableModel roomsTableModel;
 	private RoomSellerAgent roomSellerAgent;
 
-	public static void main(String[] args)
+	public RoomSellerGui(RoomSellerAgent rsa)
 	{
-		new RoomSellerGui().setVisible(true);
-	}
+		super();
+		roomSellerAgent = rsa;
 
-	public RoomSellerGui()
-	{
 		initComponents();
 
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -71,6 +69,8 @@ public class RoomSellerGui extends JFrame
 				roomsTableModel.removeRow(row);
 			}
 		});
+
+		setTitle("Offer rooms to rent");
 	}
 
 	private void initComponents()
@@ -166,8 +166,4 @@ public class RoomSellerGui extends JFrame
 		logTextArea.setCaretPosition(logTextArea.getText().length() - 1);
 	}
 
-	public void setAgent(RoomSellerAgent roomSellerAgent)
-	{
-		this.roomSellerAgent = roomSellerAgent;
-	}
 }

@@ -13,27 +13,34 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
-import com.cooperative.hotelreservation.ontology.BookTradingOntology;
+import com.cooperative.hotelreservation.ontology.Room;
+import com.cooperative.hotelreservation.ontology.RoomReservationOntology;
 import com.cooperative.hotelreservation.rent.RoomInfo;
 
 public class RoomSellerAgent extends Agent
 {
 
+	public static final String TYPE = "Room-Seller";
+
 	// all available rooms
 	private List<RoomInfo> rooms;
+
+	private Map<Room, RoomSellerPriceManager> priceManagers;
 
 	// The GUI to interact with the user
 	private RoomSellerGui roomSellerGui;
 
 	private Codec codec = new SLCodec();
-	private Ontology ontology = BookTradingOntology.getInstance();
+	private Ontology ontology = RoomReservationOntology.getInstance();
 
-	public void addNewRoom(RoomInfo roomInfo, int initPrice, int minPrice, Date deadline)
+	public void addNewRoomForRent(Room room, int initPrice, int minPrice, Date deadline)
 	{
-		addBehaviour(new RoomSellerPriceManager(this, roomInfo, initPrice, minPrice, deadline));
+		addBehaviour(new RoomSellerPriceManager(this, room, initPrice, minPrice, deadline));
 	}
 
 	public void notifyUser(String string)
@@ -50,13 +57,13 @@ public class RoomSellerAgent extends Agent
 		System.out.println("Seller-agent " + getAID().getName() + " is ready.");
 
 		rooms = new LinkedList<RoomInfo>();
+		priceManagers = new HashMap<Room, RoomSellerPriceManager>();
 
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
 
 		// Create and show the GUI
-		roomSellerGui = new RoomSellerGui();
-		roomSellerGui.setAgent(this);
+		roomSellerGui = new RoomSellerGui(this);
 		roomSellerGui.setVisible(true);
 
 		// Add the behaviour serving calls for price from buyer agents
@@ -73,8 +80,8 @@ public class RoomSellerAgent extends Agent
 		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.setName(getAID());
 		ServiceDescription sd = new ServiceDescription();
-		sd.setType("Book-selling");
-		sd.setName(getLocalName() + "-Book-selling");
+		sd.setType(TYPE);
+		sd.setName(getLocalName() + "-" + TYPE);
 		dfd.addServices(sd);
 		try
 		{
@@ -111,6 +118,16 @@ public class RoomSellerAgent extends Agent
 		{
 			fe.printStackTrace();
 		}
+	}
+
+	public RoomSellerPriceManager getRoomSellerPriceManagerForRoom(Room room)
+	{
+		return priceManagers.get(room);
+	}
+
+	public void addRoomSellerPriceManager(Room room, RoomSellerPriceManager roomSellerPriceManager)
+	{
+		priceManagers.put(room, roomSellerPriceManager);
 	}
 
 }

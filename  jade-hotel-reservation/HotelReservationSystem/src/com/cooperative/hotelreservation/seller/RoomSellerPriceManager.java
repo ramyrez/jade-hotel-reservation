@@ -4,22 +4,22 @@ import jade.core.behaviours.TickerBehaviour;
 
 import java.util.Date;
 
-import com.cooperative.hotelreservation.rent.RoomInfo;
+import com.cooperative.hotelreservation.ontology.Room;
 
 public class RoomSellerPriceManager extends TickerBehaviour
 {
 	private int minPrice, currentPrice, initPrice, deltaP;
 	private long initTime, deltaT;
-	private final RoomInfo roomInfo;
+	private final Room room;
 	private final RoomSellerAgent roomSellerAgent;
 	private final Date deadline;
 	private long deadlineTime;
 
-	RoomSellerPriceManager(RoomSellerAgent a, RoomInfo roomInfo, int ip, int mp, Date d)
+	public RoomSellerPriceManager(RoomSellerAgent a, Room room, int ip, int mp, Date d)
 	{
-		super(a, 500);
+		super(a, 10000);
 		this.roomSellerAgent = a;
-		this.roomInfo = roomInfo;
+		this.room = room;
 		this.initPrice = ip;
 		this.deadline = d;
 		this.deadlineTime = d.getTime();
@@ -36,8 +36,8 @@ public class RoomSellerPriceManager extends TickerBehaviour
 
 	public void onStart()
 	{
-		roomSellerAgent.addNewRoom(roomInfo, initPrice, minPrice, deadline);
 		super.onStart();
+		roomSellerAgent.addRoomSellerPriceManager(room, this);
 	}
 
 	public void onTick()
@@ -46,7 +46,7 @@ public class RoomSellerPriceManager extends TickerBehaviour
 		if (currentTime > deadline.getTime())
 		{
 			// deadline over
-			roomSellerAgent.notifyUser("room not sold " + roomInfo);
+			roomSellerAgent.notifyUser("room not sold " + room);
 			stop();
 		}
 		else
@@ -54,6 +54,7 @@ public class RoomSellerPriceManager extends TickerBehaviour
 			// Compute the current price
 			long elapsedTime = currentTime - initTime;
 			currentPrice = (int) Math.round(initPrice - 1.0 * deltaP * (1.0 * elapsedTime / deltaT));
+			roomSellerAgent.notifyUser("current price for room " + room + " == " + currentPrice);
 		}
 	}
 }
