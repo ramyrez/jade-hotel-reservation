@@ -12,8 +12,8 @@ import jade.lang.acl.MessageTemplate;
 import jade.proto.ContractNetResponder;
 
 import com.cooperative.hotelreservation.ontology.Costs;
+import com.cooperative.hotelreservation.ontology.Room;
 import com.cooperative.hotelreservation.ontology.Sell;
-import com.cooperative.hotelreservation.rent.RoomInfo;
 
 public class CallForOfferServer extends ContractNetResponder
 {
@@ -48,13 +48,14 @@ public class CallForOfferServer extends ContractNetResponder
 			ContentManager cm = myAgent.getContentManager();
 			Action act = (Action) cm.extractContent(cfp);
 			Sell sellAction = (Sell) act.getAction();
-			RoomInfo roomInfo = sellAction.getRoomInfo();
+			Room room = sellAction.getItem();
+			// RoomInfo roomInfo = sellAction.getRoomInfo();
 			// Book book = sellAction.getItem();
-			rsa.notifyUser("received proposal for a room " + roomInfo);
+			rsa.notifyUser("received proposal for a room " + room);
 
 			// pick on free room for given room requirements, and create a
 			// room seller price manager
-			RoomSellerPriceManager pm = null;
+			RoomSellerPriceManager pm = rsa.getRoomSellerPriceManagerForRoom(room);
 			if (pm != null)
 			{
 				// The requested book is available for sale
@@ -62,7 +63,7 @@ public class CallForOfferServer extends ContractNetResponder
 				ContentElementList cel = new ContentElementList();
 				cel.add(act);
 				Costs costs = new Costs();
-				costs.setRoomInfo(roomInfo);
+				costs.setItem(room);
 				price = pm.getCurrentPrice();
 				costs.setPrice(price);
 				cel.add(costs);
