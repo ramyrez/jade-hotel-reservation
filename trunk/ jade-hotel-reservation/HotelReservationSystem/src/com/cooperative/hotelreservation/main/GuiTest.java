@@ -12,7 +12,6 @@ public class GuiTest
 	{
 		String rentAgent = RoomRentAgent.class.getName();
 		String sellAgent = RoomSellerAgent.class.getName();
-		Boot.main(new String[] { "-gui", "rsa:" + sellAgent + ";rra:" + rentAgent });
+		Boot.main(new String[] { "-gui", "rsa:" + sellAgent + ";rra1:" + rentAgent + ";rra2:" + rentAgent });
 	}
-
 }

@@ -23,6 +23,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 
 import com.cooperative.hotelreservation.ontology.Room;
@@ -42,7 +43,8 @@ public class RoomRentGui extends JFrame
 		initComponents();
 
 		deadlineTextField.setToolTipText("example: 23:59 01.09.2010");
-		deadlineTextField.setValue(new Date());
+		long deadline = new Date().getTime() + 4 * 60 * 1000;
+		deadlineTextField.setValue(new Date(deadline));
 
 		lookForOfferButton.setText("Look for offers");
 		lookForOfferButton.addActionListener(new ActionListener()
@@ -80,7 +82,10 @@ public class RoomRentGui extends JFrame
 		JLabel hasShowerLabel = new JLabel();
 		hasShowerCheckBox = new JCheckBox();
 		JLabel maximumPriceLabel = new JLabel();
+		JPanel pricePanel = new JPanel();
 		maximumPriceSpinner = new JSpinner();
+		JLabel currentPriceLabel = new JLabel();
+		currentPriceTextField = new JTextField();
 		JLabel deadlineLabel = new JLabel();
 		deadlineTextField = new JFormattedTextField(new SimpleDateFormat("HH:mm dd.MM.yyyy"));
 		lookForOfferButton = new JButton();
@@ -136,11 +141,35 @@ public class RoomRentGui extends JFrame
 			roomPropertiesPanel.add(maximumPriceLabel, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
 					GridBagConstraints.EAST, GridBagConstraints.VERTICAL, new Insets(0, 0, 5, 5), 0, 0));
 
-			// ---- maximumPriceSpinner ----
-			maximumPriceSpinner.setModel(new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.1));
-			maximumPriceSpinner.setName("maximumPriceSpinner");
-			roomPropertiesPanel.add(maximumPriceSpinner, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0,
-					GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0, 0, 5, 0), 0, 0));
+			// ======== pricePanel ========
+			{
+				pricePanel.setName("pricePanel");
+				pricePanel.setLayout(new GridBagLayout());
+				((GridBagLayout) pricePanel.getLayout()).columnWidths = new int[] { 0, 0, 65, 60, 0 };
+				((GridBagLayout) pricePanel.getLayout()).rowHeights = new int[] { 0, 0 };
+				((GridBagLayout) pricePanel.getLayout()).columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 1.0E-4 };
+				((GridBagLayout) pricePanel.getLayout()).rowWeights = new double[] { 0.0, 1.0E-4 };
+
+				// ---- maximumPriceSpinner ----
+				maximumPriceSpinner.setModel(new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.1));
+				maximumPriceSpinner.setName("maximumPriceSpinner");
+				pricePanel.add(maximumPriceSpinner, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+						GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 5), 0, 0));
+
+				// ---- currentPriceLabel ----
+				currentPriceLabel.setText("Current price:");
+				currentPriceLabel.setName("currentPriceLabel");
+				pricePanel.add(currentPriceLabel, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
+						GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 5), 0, 0));
+
+				// ---- currentPriceTextField ----
+				currentPriceTextField.setEditable(false);
+				currentPriceTextField.setName("currentPriceTextField");
+				pricePanel.add(currentPriceTextField, new GridBagConstraints(3, 0, 1, 1, 0.0, 0.0,
+						GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+			}
+			roomPropertiesPanel.add(pricePanel, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER,
+					GridBagConstraints.BOTH, new Insets(0, 0, 5, 0), 0, 0));
 
 			// ---- deadlineLabel ----
 			deadlineLabel.setText("Deadline:");
@@ -188,9 +217,11 @@ public class RoomRentGui extends JFrame
 	private JSpinner nrOfBedsSpinner;
 	private JCheckBox hasShowerCheckBox;
 	private JSpinner maximumPriceSpinner;
+	private JTextField currentPriceTextField;
 	private JFormattedTextField deadlineTextField;
 	private JButton lookForOfferButton;
 	private JTextArea logTextArea;
+
 	// JFormDesigner - End of variables declaration //GEN-END:variables
 
 	public void setAgent(RoomRentAgent roomRentAgent)
@@ -207,5 +238,10 @@ public class RoomRentGui extends JFrame
 
 		// scroll to last position
 		logTextArea.setCaretPosition(logTextArea.getText().length() - 1);
+	}
+
+	public void updateCurrentMaxPrice(int acceptablePrice)
+	{
+		currentPriceTextField.setText(Integer.toString(acceptablePrice));
 	}
 }

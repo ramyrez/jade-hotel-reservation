@@ -47,6 +47,7 @@ public class RoomSellerPriceManager extends TickerBehaviour
 		{
 			// deadline over
 			roomSellerAgent.notifyUser("room not sold " + room);
+			roomSellerAgent.removeRoomSellerPriceManager(room);
 			stop();
 		}
 		else
@@ -54,7 +55,7 @@ public class RoomSellerPriceManager extends TickerBehaviour
 			// Compute the current price
 			long elapsedTime = currentTime - initTime;
 			currentPrice = (int) Math.round(initPrice - 1.0 * deltaP * (1.0 * elapsedTime / deltaT));
-			roomSellerAgent.notifyUser("current price for room " + room + " == " + currentPrice);
+			roomSellerAgent.updatePriceForRoom(room, currentPrice);
 		}
 	}
 }

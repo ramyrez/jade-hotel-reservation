@@ -19,6 +19,8 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 
+import com.cooperative.hotelreservation.ontology.Room;
+
 public class RoomSellerGui extends JFrame
 {
 	private RoomsTableModel roomsTableModel;
@@ -164,6 +166,11 @@ public class RoomSellerGui extends JFrame
 
 		// scroll to last pos
 		logTextArea.setCaretPosition(logTextArea.getText().length() - 1);
+	}
+
+	public void updatePriceForRoom(Room room, int currentPrice)
+	{
+		roomsTableModel.updatePriceForRoom(room, currentPrice);
 	}
 
 }

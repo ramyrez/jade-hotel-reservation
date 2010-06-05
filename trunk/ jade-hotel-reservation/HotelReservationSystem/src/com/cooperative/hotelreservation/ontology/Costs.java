@@ -6,8 +6,6 @@ package com.cooperative.hotelreservation.ontology;
 
 import jade.content.Predicate;
 
-import com.cooperative.hotelreservation.rent.RoomInfo;
-
 public class Costs implements Predicate
 {
 
