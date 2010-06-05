@@ -14,21 +14,15 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import com.cooperative.hotelreservation.ontology.Room;
 import com.cooperative.hotelreservation.ontology.RoomReservationOntology;
-import com.cooperative.hotelreservation.rent.RoomInfo;
 
 public class RoomSellerAgent extends Agent
 {
 
 	public static final String TYPE = "Room-Seller";
-
-	// all available rooms
-	private List<RoomInfo> rooms;
 
 	private Map<Room, RoomSellerPriceManager> priceManagers;
 
@@ -56,7 +50,6 @@ public class RoomSellerAgent extends Agent
 		// Printout a welcome message
 		System.out.println("Seller-agent " + getAID().getName() + " is ready.");
 
-		rooms = new LinkedList<RoomInfo>();
 		priceManagers = new HashMap<Room, RoomSellerPriceManager>();
 
 		getContentManager().registerLanguage(codec);
@@ -68,9 +61,6 @@ public class RoomSellerAgent extends Agent
 
 		// Add the behaviour serving calls for price from buyer agents
 		addBehaviour(new CallForOfferServer(this, ontology));
-
-		// Add the behaviour serving purchase requests from buyer agents
-		// addBehaviour(new PurchaseOrderServer());
 
 		/**
 		 * This piece of code, to register services with the DF, is explained in
@@ -128,6 +118,16 @@ public class RoomSellerAgent extends Agent
 	public void addRoomSellerPriceManager(Room room, RoomSellerPriceManager roomSellerPriceManager)
 	{
 		priceManagers.put(room, roomSellerPriceManager);
+	}
+
+	public void removeRoomSellerPriceManager(Room room)
+	{
+		priceManagers.remove(room);
+	}
+
+	public void updatePriceForRoom(Room room, int currentPrice)
+	{
+		roomSellerGui.updatePriceForRoom(room, currentPrice);
 	}
 
 }

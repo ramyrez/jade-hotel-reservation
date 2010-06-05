@@ -10,7 +10,6 @@ import jade.content.onto.Ontology;
 import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.Agent;
-import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
@@ -59,6 +58,8 @@ public class RoomRentAgent extends Agent
 		// Enable O2A Communication
 		setEnabledO2ACommunication(true, 0);
 		// Add the behaviour serving notifications from the external system
+		
+		/*
 		addBehaviour(new CyclicBehaviour(this)
 		{
 			public void action()
@@ -77,6 +78,7 @@ public class RoomRentAgent extends Agent
 				}
 			}
 		});
+		*/
 
 		// Printout a welcome message
 		System.out.println("Rent-agent " + getAID().getName() + " is ready.");
@@ -160,7 +162,7 @@ public class RoomRentAgent extends Agent
 		public PurchaseManager(RoomRentAgent roomRentAgent, Room room, int maxPrice, Date deadline)
 		{
 			// tick every 10 seconds
-			super(roomRentAgent, 10000);
+			super(roomRentAgent, 1000);
 
 			this.roomRentAgent = roomRentAgent;
 			this.room = room;
@@ -186,7 +188,7 @@ public class RoomRentAgent extends Agent
 				long elapsedTime = currentTime - initTime;
 				int acceptablePrice = (int) Math.round(1.0 * maxPrice * (1.0 * elapsedTime / deltaT));
 				myAgent.addBehaviour(new RoomNegotiator(room, acceptablePrice, this));
-				myGui.notifyUser("searching for room " + room + " with maxPrice == " + acceptablePrice);
+				myGui.updateCurrentMaxPrice(acceptablePrice);
 			}
 		}
 	}
@@ -205,7 +207,7 @@ public class RoomRentAgent extends Agent
 	public class RoomNegotiator extends ContractNetInitiator
 	{
 		private int maxPrice;
-		private PurchaseManager manager;
+		private PurchaseManager purchaseManager;
 		private Room room;
 
 		public RoomNegotiator(Room room, int p, PurchaseManager m)
@@ -214,7 +216,7 @@ public class RoomRentAgent extends Agent
 
 			this.room = room;
 			maxPrice = p;
-			manager = m;
+			purchaseManager = m;
 			Sell sellAction = new Sell();
 			sellAction.setItem(room);
 			Action act = new Action(RoomRentAgent.this.getAID(), sellAction);
@@ -295,7 +297,7 @@ public class RoomRentAgent extends Agent
 			// Book successfully purchased
 			int price = Integer.parseInt(inform.getContent());
 			myGui.notifyUser(room + " successfully purchased. Price =" + price);
-			manager.stop();
+			purchaseManager.stop();
 		}
 
 	} // End of inner class BookNegotiator
