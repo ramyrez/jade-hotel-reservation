@@ -11,12 +11,15 @@ import com.cooperative.hotelreservation.ontology.Room;
 public class RoomsTableModel extends AbstractTableModel
 {
 
+	private static final long serialVersionUID = 5983739885948030414L;
+
 	private final String[] columns = new String[] { "# of beds in the room", "has shower?", "minimum price",
-			"ready for sale", "current price" };
+			"start price", "ready for sale", "current price" };
 
 	private final List<Boolean> readyForSaleList;
 	private final List<Room> rooms;
-	private final List<Double> prices;
+	private final List<Double> minimumPrices;
+	private final List<Double> startPrices;
 	private final List<Double> currentPrices;
 
 	private final RoomSellerAgent roomSellerAgent;
@@ -28,7 +31,8 @@ public class RoomsTableModel extends AbstractTableModel
 		this.roomSellerAgent = roomSellerAgent;
 
 		rooms = new LinkedList<Room>();
-		prices = new LinkedList<Double>();
+		minimumPrices = new LinkedList<Double>();
+		startPrices = new LinkedList<Double>();
 		currentPrices = new LinkedList<Double>();
 		readyForSaleList = new LinkedList<Boolean>();
 	}
@@ -36,7 +40,8 @@ public class RoomsTableModel extends AbstractTableModel
 	public void addNewRoom()
 	{
 		rooms.add(new Room());
-		prices.add(new Double(0.0D));
+		minimumPrices.add(new Double(0.0D));
+		startPrices.add(new Double(0.0D));
 		currentPrices.add(new Double(0.0D));
 		readyForSaleList.add(Boolean.FALSE);
 		fireTableRowsInserted(rooms.size() - 1, rooms.size() - 1);
@@ -52,10 +57,11 @@ public class RoomsTableModel extends AbstractTableModel
 			case 1:
 				return Boolean.class;
 			case 2:
-				return Double.class;
 			case 3:
-				return Boolean.class;
+				return Double.class;
 			case 4:
+				return Boolean.class;
+			case 5:
 				return Double.class;
 		}
 		return Object.class;
@@ -89,10 +95,12 @@ public class RoomsTableModel extends AbstractTableModel
 			case 1:
 				return rooms.get(rowIndex).getHasShower();
 			case 2:
-				return prices.get(rowIndex);
+				return minimumPrices.get(rowIndex);
 			case 3:
-				return readyForSaleList.get(rowIndex);
+				return startPrices.get(rowIndex);
 			case 4:
+				return readyForSaleList.get(rowIndex);
+			case 5:
 				return currentPrices.get(rowIndex);
 		}
 		return null;
@@ -105,7 +113,7 @@ public class RoomsTableModel extends AbstractTableModel
 		if (readyForSale)
 			return false;
 
-		if (columnIndex == 4)
+		if (columnIndex == 5)
 			return false;
 
 		return true;
@@ -116,13 +124,15 @@ public class RoomsTableModel extends AbstractTableModel
 		if (row < 0)
 			return;
 
-		rooms.remove(row);
-		prices.remove(row);
+		Room room = rooms.remove(row);
+		startPrices.remove(row);
+		minimumPrices.remove(row);
 		readyForSaleList.remove(row);
 		currentPrices.remove(row);
 		fireTableRowsDeleted(row, row);
 
-		// TODO inform agent for deleted room
+		// inform agent for deleted room
+		roomSellerAgent.removeRoomSellerPriceManager(room);
 	}
 
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex)
@@ -138,16 +148,21 @@ public class RoomsTableModel extends AbstractTableModel
 				rooms.get(rowIndex).setHasShower(bool.booleanValue());
 				break;
 			case 2:
-				Double doubleVal = (Double) aValue;
-				prices.set(rowIndex, doubleVal);
-				break;
 			case 3:
+				Double doubleVal = (Double) aValue;
+				if (columnIndex == 2)
+					minimumPrices.set(rowIndex, doubleVal);
+				else
+					startPrices.set(rowIndex, doubleVal);
+				break;
+			case 4:
 				readyForSaleList.set(rowIndex, Boolean.TRUE);
 
 				Room room = rooms.get(rowIndex);
-				Double price = prices.get(rowIndex);
-				long now = new Date().getTime() + (5 * 60 * 1000);
-				roomSellerAgent.addNewRoomForRent(room, price.intValue() * 2, price.intValue(), new Date(now));
+				Double minPrice = minimumPrices.get(rowIndex);
+				Double startPrice = startPrices.get(rowIndex);
+				long now = new Date().getTime() + (4 * 60 * 1000);
+				roomSellerAgent.addNewRoomForRent(room, startPrice.intValue(), minPrice.intValue(), new Date(now));
 				break;
 		}
 	}
@@ -158,8 +173,18 @@ public class RoomsTableModel extends AbstractTableModel
 		if (index >= 0)
 		{
 			currentPrices.set(index, Double.valueOf(currentPrice));
-			fireTableCellUpdated(index, 4);
+			fireTableCellUpdated(index, 5);
 		}
+	}
+
+	public void removeRoom(Room room)
+	{
+		if (room == null)
+			return;
+
+		int index = rooms.indexOf(room);
+		if (index >= 0)
+			removeRow(index);
 	}
 
 }

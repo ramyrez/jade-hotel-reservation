@@ -1,38 +1,24 @@
 package com.cooperative.hotelreservation.ontology;
 
-public class Room
+import java.io.Serializable;
+
+/**
+ * Representation of a room with all it's descriptive properties like number of
+ * beds and has shower.
+ */
+public class Room implements Serializable
 {
+
+	private static final long serialVersionUID = -8647556717248630790L;
 
 	private int bedCount;
 	private boolean hasShower;
 
-	public int getBedCount()
+	public Room()
 	{
-		return bedCount;
-	}
-
-	public void setBedCount(int bedCount)
-	{
-		this.bedCount = bedCount;
-	}
-
-	public void setHasShower(boolean hasShower)
-	{
-		this.hasShower = hasShower;
-	}
-
-	public boolean getHasShower()
-	{
-		return hasShower;
-	}
-
-	@Override
-	public String toString()
-	{
-		StringBuilder str = new StringBuilder();
-		str.append("[bedCount=").append(bedCount);
-		str.append(",hasShower=").append(hasShower).append("]");
-		return str.toString();
+		super();
+		bedCount = 2;
+		hasShower = true;
 	}
 
 	@Override
@@ -52,6 +38,16 @@ public class Room
 		return true;
 	}
 
+	public int getBedCount()
+	{
+		return bedCount;
+	}
+
+	public boolean getHasShower()
+	{
+		return hasShower;
+	}
+
 	@Override
 	public int hashCode()
 	{
@@ -60,6 +56,25 @@ public class Room
 		result = (result * prime) + (hasShower ? 0 : 1);
 		result = (result * prime) + bedCount;
 		return result;
+	}
+
+	public void setBedCount(int bedCount)
+	{
+		this.bedCount = bedCount;
+	}
+
+	public void setHasShower(boolean hasShower)
+	{
+		this.hasShower = hasShower;
+	}
+
+	@Override
+	public String toString()
+	{
+		StringBuilder str = new StringBuilder();
+		str.append("[bedCount=").append(bedCount);
+		str.append(",hasShower=").append(hasShower).append("]");
+		return str.toString();
 	}
 
 }

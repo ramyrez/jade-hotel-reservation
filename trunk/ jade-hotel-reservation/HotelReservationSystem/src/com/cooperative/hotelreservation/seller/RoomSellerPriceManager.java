@@ -4,27 +4,33 @@ import jade.core.behaviours.TickerBehaviour;
 
 import java.util.Date;
 
+import com.cooperative.hotelreservation.Delays;
 import com.cooperative.hotelreservation.ontology.Room;
 
 public class RoomSellerPriceManager extends TickerBehaviour
 {
-	private int minPrice, currentPrice, initPrice, deltaP;
+	private static final long serialVersionUID = 5144870849225835501L;
+
+	private int currentPrice, initPrice, deltaP;
 	private long initTime, deltaT;
 	private final Room room;
 	private final RoomSellerAgent roomSellerAgent;
 	private final Date deadline;
 	private long deadlineTime;
 
-	public RoomSellerPriceManager(RoomSellerAgent a, Room room, int ip, int mp, Date d)
+	public RoomSellerPriceManager(RoomSellerAgent roomSellerAgent, Room room, int startPrice, int minimumPrice,
+			Date deadline)
 	{
-		super(a, 10000);
-		this.roomSellerAgent = a;
+		// delay of 1 second
+		super(roomSellerAgent, Delays.ONE_SECOND);
+
+		this.roomSellerAgent = roomSellerAgent;
 		this.room = room;
-		this.initPrice = ip;
-		this.deadline = d;
-		this.deadlineTime = d.getTime();
+		this.initPrice = startPrice;
+		this.deadline = deadline;
+		this.deadlineTime = deadline.getTime();
 		currentPrice = initPrice;
-		deltaP = initPrice - mp;
+		deltaP = initPrice - minimumPrice;
 		initTime = System.currentTimeMillis();
 		deltaT = ((deadlineTime - initTime) > 0 ? (deadlineTime - initTime) : 60000);
 	}
@@ -41,7 +47,7 @@ public class RoomSellerPriceManager extends TickerBehaviour
 	}
 
 	public void onTick()
-	{
+	{		
 		long currentTime = System.currentTimeMillis();
 		if (currentTime > deadline.getTime())
 		{
