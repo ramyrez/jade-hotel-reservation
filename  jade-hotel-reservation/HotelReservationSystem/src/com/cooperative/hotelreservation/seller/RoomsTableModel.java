@@ -40,8 +40,8 @@ public class RoomsTableModel extends AbstractTableModel
 	public void addNewRoom()
 	{
 		rooms.add(new Room());
-		minimumPrices.add(new Double(0.0D));
-		startPrices.add(new Double(0.0D));
+		minimumPrices.add(new Double(10.0D));
+		startPrices.add(new Double(100.0D));
 		currentPrices.add(new Double(0.0D));
 		readyForSaleList.add(Boolean.FALSE);
 		fireTableRowsInserted(rooms.size() - 1, rooms.size() - 1);
