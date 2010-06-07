@@ -23,6 +23,8 @@ import com.cooperative.hotelreservation.ontology.Room;
 
 public class RoomSellerGui extends JFrame
 {
+
+	private static final long serialVersionUID = -1683622276108171348L;
 	private RoomsTableModel roomsTableModel;
 	private RoomSellerAgent roomSellerAgent;
 
@@ -171,6 +173,11 @@ public class RoomSellerGui extends JFrame
 	public void updatePriceForRoom(Room room, int currentPrice)
 	{
 		roomsTableModel.updatePriceForRoom(room, currentPrice);
+	}
+
+	public void removeRoom(Room room)
+	{
+		roomsTableModel.removeRoom(room);
 	}
 
 }

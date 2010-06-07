@@ -1,11 +1,7 @@
-/**
- * Section 5.1.3.1 Page 82 Ontology of the Book Trading Example.
- **/
 package com.cooperative.hotelreservation.ontology;
 
 import jade.content.onto.BasicOntology;
 import jade.content.onto.Ontology;
-import jade.content.onto.OntologyException;
 import jade.content.schema.AgentActionSchema;
 import jade.content.schema.ConceptSchema;
 import jade.content.schema.PredicateSchema;
@@ -13,45 +9,46 @@ import jade.content.schema.PrimitiveSchema;
 
 public class RoomReservationOntology extends Ontology implements RoomReservationVocabulary
 {
-	// The name identifying this ontology
-	public static final String ONTOLOGY_NAME = "room-reservation-ontology";
+	private static final long serialVersionUID = 3448981807861039724L;
 
-	// The singleton instance of this ontology
-	private static Ontology theInstance = new RoomReservationOntology();
+	public static final String NAME = "room-reservation-ontology";
+	private static final RoomReservationOntology INSTANCE = new RoomReservationOntology();
 
-	// Retrieve the singleton Book-trading ontology instance
-	public static Ontology getInstance()
+	/**
+	 * Get the singleton instance of this ontology
+	 * @return
+	 */
+	public static RoomReservationOntology getInstance()
 	{
-		return theInstance;
+		return INSTANCE;
 	}
 
-	// Private constructor
 	private RoomReservationOntology()
 	{
-		// The Book-trading ontology extends the basic ontology
-		super(ONTOLOGY_NAME, BasicOntology.getInstance());
+		super(NAME, BasicOntology.getInstance());
 		try
 		{
+			// add all schemas
 			add(new ConceptSchema(ROOM), Room.class);
-			add(new PredicateSchema(COSTS), Costs.class);
-			add(new AgentActionSchema(SELL), Sell.class);
+			add(new PredicateSchema(COSTS), CostsPredicate.class);
+			add(new AgentActionSchema(RENT), RentAgentAction.class);
 
-			// Structure of the schema for the Room concept
-			ConceptSchema cs = (ConceptSchema) getSchema(ROOM);
-			cs.add(ROOM_BED_COUNT, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
-			cs.add(ROOM_HAS_SHOWER, (PrimitiveSchema) getSchema(BasicOntology.BOOLEAN));
+			// define the room schema
+			ConceptSchema roomSchema = (ConceptSchema) getSchema(ROOM);
+			roomSchema.add(ROOM_BED_COUNT, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
+			roomSchema.add(ROOM_HAS_SHOWER, (PrimitiveSchema) getSchema(BasicOntology.BOOLEAN));
 
-			// Structure of the schema for the Costs predicate
-			PredicateSchema ps = (PredicateSchema) getSchema(COSTS);
-			ps.add(COSTS_ITEM, (ConceptSchema) cs);
-			ps.add(COSTS_PRICE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
+			// define the costs schema
+			PredicateSchema costsSchema = (PredicateSchema) getSchema(COSTS);
+			costsSchema.add(COSTS_ROOM, (ConceptSchema) roomSchema);
+			costsSchema.add(COSTS_PRICE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
 
-			// Structure of the schema for the Sell agent action
-			AgentActionSchema as = (AgentActionSchema) getSchema(SELL);
-			as.add(SELL_ITEM, (ConceptSchema) getSchema(ROOM));
-		} catch (OntologyException oe)
+			// Structure of the schema for the RentAgentAction agent action
+			AgentActionSchema sellSchema = (AgentActionSchema) getSchema(RENT);
+			sellSchema.add(RENT_ROOM, (ConceptSchema) getSchema(ROOM));
+		} catch (Exception e)
 		{
-			oe.printStackTrace();
+			throw new RuntimeException("esception while specifying room reservation ontology", e);
 		}
 	}
 }

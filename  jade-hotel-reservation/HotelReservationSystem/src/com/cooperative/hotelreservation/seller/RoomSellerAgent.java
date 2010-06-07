@@ -22,6 +22,8 @@ import com.cooperative.hotelreservation.ontology.RoomReservationOntology;
 public class RoomSellerAgent extends Agent
 {
 
+	private static final long serialVersionUID = 5748395638208816754L;
+
 	public static final String TYPE = "Room-Seller";
 
 	private Map<Room, RoomSellerPriceManager> priceManagers;
@@ -122,7 +124,10 @@ public class RoomSellerAgent extends Agent
 
 	public void removeRoomSellerPriceManager(Room room)
 	{
-		priceManagers.remove(room);
+		roomSellerGui.removeRoom(room);
+		RoomSellerPriceManager priceManager = priceManagers.remove(room);
+		if (priceManager != null)
+			removeBehaviour(priceManager);
 	}
 
 	public void updatePriceForRoom(Room room, int currentPrice)

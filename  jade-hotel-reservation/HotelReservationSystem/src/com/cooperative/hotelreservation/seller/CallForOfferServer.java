@@ -9,19 +9,21 @@ import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 import jade.domain.FIPAAgentManagement.RefuseException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.lang.acl.UnreadableException;
 import jade.proto.ContractNetResponder;
 
-import com.cooperative.hotelreservation.ontology.Costs;
+import com.cooperative.hotelreservation.ontology.CostsPredicate;
+import com.cooperative.hotelreservation.ontology.RentAgentAction;
 import com.cooperative.hotelreservation.ontology.Room;
-import com.cooperative.hotelreservation.ontology.Sell;
 
 public class CallForOfferServer extends ContractNetResponder
 {
 
-	int price;
+	private static final long serialVersionUID = 147495886799182189L;
+	private int price;
 	private RoomSellerAgent rsa;
 
-	CallForOfferServer(RoomSellerAgent rsa, Ontology ontology)
+	public CallForOfferServer(RoomSellerAgent rsa, Ontology ontology)
 	{
 		super(rsa, MessageTemplate.and(MessageTemplate.MatchOntology(ontology.getName()), MessageTemplate
 				.MatchPerformative(ACLMessage.CFP)));
@@ -35,7 +37,19 @@ public class CallForOfferServer extends ContractNetResponder
 		ACLMessage inform = accept.createReply();
 		inform.setPerformative(ACLMessage.INFORM);
 		inform.setContent(Integer.toString(price));
+		
 		rsa.notifyUser("Sent inform at price " + price);
+		
+		// extract room
+		try
+		{
+			Room room = (Room) accept.getContentObject();
+			rsa.removeRoomSellerPriceManager(room);			
+		} catch (UnreadableException e)
+		{
+			e.printStackTrace();
+		}
+		
 		return inform;
 	}
 
@@ -47,10 +61,8 @@ public class CallForOfferServer extends ContractNetResponder
 		{
 			ContentManager cm = myAgent.getContentManager();
 			Action act = (Action) cm.extractContent(cfp);
-			Sell sellAction = (Sell) act.getAction();
-			Room room = sellAction.getItem();
-			// RoomInfo roomInfo = sellAction.getRoomInfo();
-			// Book book = sellAction.getItem();
+			RentAgentAction sellAction = (RentAgentAction) act.getAction();
+			Room room = sellAction.getRoom();
 			rsa.notifyUser("received proposal for a room " + room);
 
 			// pick on free room for given room requirements, and create a
@@ -62,8 +74,8 @@ public class CallForOfferServer extends ContractNetResponder
 				reply.setPerformative(ACLMessage.PROPOSE);
 				ContentElementList cel = new ContentElementList();
 				cel.add(act);
-				Costs costs = new Costs();
-				costs.setItem(room);
+				CostsPredicate costs = new CostsPredicate();
+				costs.setRoom(room);
 				price = pm.getCurrentPrice();
 				costs.setPrice(price);
 				cel.add(costs);

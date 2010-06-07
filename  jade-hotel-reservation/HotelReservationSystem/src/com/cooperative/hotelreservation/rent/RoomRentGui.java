@@ -31,6 +31,8 @@ import com.cooperative.hotelreservation.ontology.Room;
 public class RoomRentGui extends JFrame
 {
 
+	private static final long serialVersionUID = -1268662637017707167L;
+
 	public static void main(String[] args)
 	{
 		new RoomRentGui().setVisible(true);
@@ -43,7 +45,7 @@ public class RoomRentGui extends JFrame
 		initComponents();
 
 		deadlineTextField.setToolTipText("example: 23:59 01.09.2010");
-		long deadline = new Date().getTime() + 4 * 60 * 1000;
+		long deadline = new Date().getTime() + 2 * 60 * 1000;
 		deadlineTextField.setValue(new Date(deadline));
 
 		lookForOfferButton.setText("Look for offers");
