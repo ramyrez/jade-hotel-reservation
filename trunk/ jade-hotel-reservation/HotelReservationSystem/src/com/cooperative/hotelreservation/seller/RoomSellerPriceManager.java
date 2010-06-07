@@ -47,7 +47,7 @@ public class RoomSellerPriceManager extends TickerBehaviour
 	}
 
 	public void onTick()
-	{		
+	{
 		long currentTime = System.currentTimeMillis();
 		if (currentTime > deadline.getTime())
 		{

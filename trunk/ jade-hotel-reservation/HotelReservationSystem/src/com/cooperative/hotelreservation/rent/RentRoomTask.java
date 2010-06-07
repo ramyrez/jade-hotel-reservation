@@ -1,7 +1,6 @@
 package com.cooperative.hotelreservation.rent;
 
 import jade.core.behaviours.TickerBehaviour;
-import jade.lang.acl.ACLMessage;
 
 import java.util.Date;
 
@@ -36,7 +35,7 @@ public class RentRoomTask extends TickerBehaviour
 		if (currentTime > deadline)
 		{
 			// Deadline expired
-			roomRentAgent.notifyUser("Cannot rent room " + room);
+			roomRentAgent.notifyUser("Cannot rent a room " + room + " within given time");
 			roomRentAgent.removeBehaviour(this);
 			stop();
 		}
@@ -47,9 +46,7 @@ public class RentRoomTask extends TickerBehaviour
 			long elapsedTime = currentTime - initTime;
 			int acceptablePrice = (int) Math.round(1.0 * maxPrice * (1.0 * elapsedTime / deltaT));
 
-			ACLMessage callForProposal = new ACLMessage(ACLMessage.CFP);
-			NegotiateRoomPriceTask task = new NegotiateRoomPriceTask(roomRentAgent, callForProposal, room,
-					acceptablePrice, this);
+			NewNegotiateRoomPriceTask task = new NewNegotiateRoomPriceTask(roomRentAgent, room, acceptablePrice, this);
 			this.roomRentAgent.addBehaviour(task);
 			this.roomRentAgent.updateCurrentMaxPrice(acceptablePrice);
 		}

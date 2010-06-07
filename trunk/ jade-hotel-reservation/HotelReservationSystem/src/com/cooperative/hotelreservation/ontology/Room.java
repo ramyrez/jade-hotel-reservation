@@ -17,8 +17,8 @@ public class Room implements Serializable
 	public Room()
 	{
 		super();
-		bedCount = 2;
-		hasShower = true;
+		bedCount = 1;
+		hasShower = false;
 	}
 
 	@Override

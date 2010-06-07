@@ -62,7 +62,8 @@ public class RoomSellerAgent extends Agent
 		roomSellerGui.setVisible(true);
 
 		// Add the behaviour serving calls for price from buyer agents
-		addBehaviour(new CallForOfferServer(this, ontology));
+		// addBehaviour(new CallForOfferServer(this, ontology));
+		 addBehaviour(new NewCallForOfferServer(this));
 
 		/**
 		 * This piece of code, to register services with the DF, is explained in
