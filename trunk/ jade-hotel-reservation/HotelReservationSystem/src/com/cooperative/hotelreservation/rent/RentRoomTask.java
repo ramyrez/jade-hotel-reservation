@@ -34,20 +34,21 @@ public class RentRoomTask extends TickerBehaviour
 		long currentTime = System.currentTimeMillis();
 		if (currentTime > deadline)
 		{
-			// Deadline expired
-			roomRentAgent.notifyUser("Cannot rent a room " + room + " within given time");
+			// deadline has expired
+			roomRentAgent.addLogMsg("There is no " + room + " available with maximum price of " + maxPrice);
 			roomRentAgent.removeBehaviour(this);
 			stop();
 		}
 		else
 		{
-			// Compute the currently acceptable price and start a
-			// negotiation
+			// Compute the currently acceptable price and start room negotiation
 			long elapsedTime = currentTime - initTime;
 			int acceptablePrice = (int) Math.round(1.0 * maxPrice * (1.0 * elapsedTime / deltaT));
 
-			NewNegotiateRoomPriceTask task = new NewNegotiateRoomPriceTask(roomRentAgent, room, acceptablePrice, this);
+			NegotiateRoomPriceTask task = new NegotiateRoomPriceTask(roomRentAgent, room, this, acceptablePrice);
 			this.roomRentAgent.addBehaviour(task);
+
+			// inform the agent of the current maximum price
 			this.roomRentAgent.updateCurrentMaxPrice(acceptablePrice);
 		}
 	}

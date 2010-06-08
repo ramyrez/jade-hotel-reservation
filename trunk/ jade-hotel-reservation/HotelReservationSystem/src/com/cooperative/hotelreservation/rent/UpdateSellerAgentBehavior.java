@@ -5,6 +5,7 @@ import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.SearchConstraints;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 
 import java.util.ArrayList;
@@ -26,11 +27,15 @@ public class UpdateSellerAgentBehavior extends TickerBehaviour
 
 	protected void onTick()
 	{
-		// Update the list of seller agents
+		// get all available seller agents
 		DFAgentDescription template = new DFAgentDescription();
 		ServiceDescription sd = new ServiceDescription();
 		sd.setType(RoomSellerAgent.TYPE);
 		template.addServices(sd);
+
+		// create search constraint so we get all and not just one agent
+		SearchConstraints sc = new SearchConstraints();
+		sc.setMaxResults(Long.valueOf(-1));
 		try
 		{
 			DFAgentDescription[] result = DFService.search(myAgent, template);
@@ -39,11 +44,12 @@ public class UpdateSellerAgentBehavior extends TickerBehaviour
 			{
 				sellerAgents.add(agentDescription.getName());
 			}
+
+			// update the list of available seller agents in the roomRentAgent
 			roomRentAgent.setAvailableSellerAgents(sellerAgents);
 		} catch (FIPAException fe)
 		{
 			fe.printStackTrace();
 		}
 	}
-
 }

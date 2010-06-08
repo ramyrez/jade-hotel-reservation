@@ -159,7 +159,7 @@ public class RoomSellerGui extends JFrame
 
 	// JFormDesigner - End of variables declaration //GEN-END:variables
 
-	public void notifyUser(String message)
+	public void addLogMsg(String message)
 	{
 		int length = logTextArea.getText().length();
 		if (length != 0)
