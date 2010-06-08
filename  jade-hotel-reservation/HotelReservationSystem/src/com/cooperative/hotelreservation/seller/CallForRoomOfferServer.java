@@ -8,14 +8,15 @@ import com.cooperative.hotelreservation.ontology.CostsPredicate;
 import com.cooperative.hotelreservation.ontology.RentAgentAction;
 import com.cooperative.hotelreservation.ontology.Room;
 
-public class NewCallForOfferServer extends CyclicBehaviour
+public class CallForRoomOfferServer extends CyclicBehaviour
 {
 
 	private static final long serialVersionUID = 147495886799182189L;
-	private int price;
-	private RoomSellerAgent rsa;
 
-	public NewCallForOfferServer(RoomSellerAgent rsa)
+	private int currentPrice;
+	private final RoomSellerAgent rsa;
+
+	public CallForRoomOfferServer(RoomSellerAgent rsa)
 	{
 		super(rsa);
 		this.rsa = rsa;
@@ -24,7 +25,8 @@ public class NewCallForOfferServer extends CyclicBehaviour
 	@Override
 	public void action()
 	{
-		// MessageTemplate matchOntology = MessageTemplate.MatchOntology(RoomReservationOntology.getInstance().getName());
+		// MessageTemplate matchOntology =
+		// MessageTemplate.MatchOntology(RoomReservationOntology.getInstance().getName());
 		ACLMessage message = myAgent.receive();
 		if (message != null)
 		{
@@ -57,14 +59,13 @@ public class NewCallForOfferServer extends CyclicBehaviour
 		ACLMessage inform = message.createReply();
 
 		inform.setPerformative(ACLMessage.INFORM);
-		inform.setContent(Integer.toString(price));
-
-		rsa.notifyUser("Sent inform at price " + price);
+		inform.setContent(Integer.toString(currentPrice));
 
 		try
 		{
 			// extract room
 			Room room = (Room) message.getContentObject();
+			rsa.addLogMsg("room " + room + " has been reserved by an user for " + currentPrice);
 			rsa.removeRoomSellerPriceManager(room);
 		} catch (UnreadableException e)
 		{
@@ -76,40 +77,41 @@ public class NewCallForOfferServer extends CyclicBehaviour
 
 	private ACLMessage handleCFPMessage(ACLMessage message)
 	{
-		// CFP Message received. Process it
 		ACLMessage reply = message.createReply();
 		try
 		{
+
+			// extract the room out of the CFP message
 			RentAgentAction rAA = (RentAgentAction) message.getContentObject();
 			Room room = rAA.getRoom();
-			rsa.notifyUser("received proposal for a room " + room);
+			rsa.addLogMsg("received proposal for a room " + room);
 
-			// pick on free room for given room requirements, and create a
-			// room seller price manager
+			// get the room seller price manager for given room
 			RoomSellerPriceManager pm = rsa.getRoomSellerPriceManagerForRoom(room);
 			if (pm != null)
 			{
-				// The requested book is available for sale
+				// create the propose as reply
 				reply.setPerformative(ACLMessage.PROPOSE);
-				price = pm.getCurrentPrice();
+				currentPrice = pm.getCurrentPrice();
 
 				CostsPredicate costs = new CostsPredicate();
-				costs.setPrice(price);
+				costs.setPrice(currentPrice);
 				costs.setRoom(room);
 
 				reply.setContentObject(costs);
 
-				rsa.notifyUser("sent proposal to offer the room at a rent of " + price);
+				rsa.addLogMsg("sent proposal to offer the room at a rent of " + currentPrice);
 			}
 			else
 			{
+				// there is no room available
 				reply.setPerformative(ACLMessage.REFUSE);
-				rsa.notifyUser("sent refuse as there is no room for rent");
 			}
 		} catch (Exception e)
 		{
+			// message has not been understood
 			reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
-			rsa.notifyUser("did not understood the message");
+			rsa.addLogMsg("did not understood the message");
 		}
 		return reply;
 	}

@@ -52,13 +52,13 @@ public class RoomSellerPriceManager extends TickerBehaviour
 		if (currentTime > deadline.getTime())
 		{
 			// deadline over
-			roomSellerAgent.notifyUser("room not sold " + room);
+			roomSellerAgent.addLogMsg("room not sold " + room);
 			roomSellerAgent.removeRoomSellerPriceManager(room);
 			stop();
 		}
 		else
 		{
-			// Compute the current price
+			// calculate current price
 			long elapsedTime = currentTime - initTime;
 			currentPrice = (int) Math.round(initPrice - 1.0 * deltaP * (1.0 * elapsedTime / deltaT));
 			roomSellerAgent.updatePriceForRoom(room, currentPrice);

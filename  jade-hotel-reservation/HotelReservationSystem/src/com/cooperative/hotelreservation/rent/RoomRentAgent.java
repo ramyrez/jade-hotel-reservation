@@ -22,14 +22,15 @@ public class RoomRentAgent extends Agent
 
 	private static final long serialVersionUID = -1633994238851510422L;
 
-	// The list of known seller agents
 	private List<AID> sellerAgents = new LinkedList<AID>();
-
-	// The GUI to interact with the user
 	private RoomRentGui roomRentGui;
-
 	private Codec codec = new SLCodec();
 	private RoomReservationOntology ontology = RoomReservationOntology.getInstance();
+
+	public void addLogMsg(String message)
+	{
+		roomRentGui.addLogMsg(message);
+	}
 
 	public Codec getCodec()
 	{
@@ -44,11 +45,6 @@ public class RoomRentAgent extends Agent
 	public List<AID> getSellerAgents()
 	{
 		return sellerAgents;
-	}
-
-	public void notifyUser(String message)
-	{
-		roomRentGui.notifyUser(message);
 	}
 
 	public void purchase(Room room, int maxPrice, Date deadline)
@@ -72,24 +68,11 @@ public class RoomRentAgent extends Agent
 	 **/
 	protected void setup()
 	{
-
-		/**
-		 * The following piece of code is explained in section 5.6.1 pag. 113 of
-		 * the book. It processes notifications from the external buying system
-		 * (other modifications also need to be introduced to handle the
-		 * successful purchase or deadline expiration).
-		 **/
-		// Enable O2A Communication
-		setEnabledO2ACommunication(true, 0);
-		// Add the behaviour serving notifications from the external system
-
-		// Printout a welcome message
-		System.out.println("Rent-agent " + getAID().getName() + " is ready.");
-
+		// register codec and ontology
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
 
-		// Show the GUI to interact with the user
+		// create a new rent gui and show it
 		roomRentGui = new RoomRentGui();
 		roomRentGui.setAgent(this);
 		roomRentGui.setVisible(true);
@@ -98,18 +81,11 @@ public class RoomRentAgent extends Agent
 		addBehaviour(new UpdateSellerAgentBehavior(this, Delays.TEN_SECONDS));
 	}
 
-	/**
-	 * Agent clean-up
-	 **/
 	protected void takeDown()
 	{
-		// Dispose the GUI if it is there
 		if (roomRentGui != null)
 		{
 			roomRentGui.setVisible(false);
 		}
-
-		// Printout a dismissal message
-		System.out.println("Buyer-agent " + getAID().getName() + "terminated.");
 	}
 }

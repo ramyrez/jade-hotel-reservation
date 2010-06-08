@@ -22,54 +22,63 @@ import com.cooperative.hotelreservation.ontology.RoomReservationOntology;
 public class RoomSellerAgent extends Agent
 {
 
+	public static final String TYPE = "room-seller";
+
 	private static final long serialVersionUID = 5748395638208816754L;
 
-	public static final String TYPE = "Room-Seller";
-
 	private Map<Room, RoomSellerPriceManager> priceManagers;
-
-	// The GUI to interact with the user
 	private RoomSellerGui roomSellerGui;
-
 	private Codec codec = new SLCodec();
 	private Ontology ontology = RoomReservationOntology.getInstance();
+
+	public void addLogMsg(String string)
+	{
+		roomSellerGui.addLogMsg(string);
+	}
 
 	public void addNewRoomForRent(Room room, int initPrice, int minPrice, Date deadline)
 	{
 		addBehaviour(new RoomSellerPriceManager(this, room, initPrice, minPrice, deadline));
 	}
 
-	public void notifyUser(String string)
+	public void addRoomSellerPriceManager(Room room, RoomSellerPriceManager roomSellerPriceManager)
 	{
-		roomSellerGui.notifyUser(string);
+		priceManagers.put(room, roomSellerPriceManager);
 	}
 
-	/**
-	 * Agent initializations
-	 **/
+	public RoomSellerPriceManager getRoomSellerPriceManagerForRoom(Room room)
+	{
+		return priceManagers.get(room);
+	}
+
+	public void removeRoomSellerPriceManager(Room room)
+	{
+		roomSellerGui.removeRoom(room);
+		RoomSellerPriceManager priceManager = priceManagers.remove(room);
+		if (priceManager != null)
+			removeBehaviour(priceManager);
+	}
+
+	public void updatePriceForRoom(Room room, int currentPrice)
+	{
+		roomSellerGui.updatePriceForRoom(room, currentPrice);
+	}
+
 	protected void setup()
 	{
-		// Printout a welcome message
-		System.out.println("Seller-agent " + getAID().getName() + " is ready.");
-
 		priceManagers = new HashMap<Room, RoomSellerPriceManager>();
 
+		// register codec and ontology
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
 
-		// Create and show the GUI
 		roomSellerGui = new RoomSellerGui(this);
 		roomSellerGui.setVisible(true);
 
-		// Add the behaviour serving calls for price from buyer agents
-		// addBehaviour(new CallForOfferServer(this, ontology));
-		 addBehaviour(new NewCallForOfferServer(this));
+		// add behavior which listens on call for proposals
+		addBehaviour(new CallForRoomOfferServer(this));
 
-		/**
-		 * This piece of code, to register services with the DF, is explained in
-		 * the book in section 4.4.2.1, page 73
-		 **/
-		// Register the book-selling service in the yellow pages
+		// register this agent as a service which sells rooms
 		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.setName(getAID());
 		ServiceDescription sd = new ServiceDescription();
@@ -85,55 +94,21 @@ public class RoomSellerAgent extends Agent
 		}
 	}
 
-	/**
-	 * Agent clean-up
-	 **/
 	protected void takeDown()
 	{
-		// Dispose the GUI if it is there
 		if (roomSellerGui != null)
 		{
 			roomSellerGui.setVisible(false);
 		}
 
-		// Printout a dismissal message
-		System.out.println("Seller-agent " + getAID().getName() + "terminating.");
-
-		/**
-		 * This piece of code, to deregister with the DF, is explained in the
-		 * book in section 4.4.2.1, page 73
-		 **/
-		// Deregister from the yellow pages
+		// remove this agents service from the directory facilitator
 		try
 		{
 			DFService.deregister(this);
-		} catch (FIPAException fe)
+		} catch (FIPAException e)
 		{
-			fe.printStackTrace();
+			e.printStackTrace();
 		}
-	}
-
-	public RoomSellerPriceManager getRoomSellerPriceManagerForRoom(Room room)
-	{
-		return priceManagers.get(room);
-	}
-
-	public void addRoomSellerPriceManager(Room room, RoomSellerPriceManager roomSellerPriceManager)
-	{
-		priceManagers.put(room, roomSellerPriceManager);
-	}
-
-	public void removeRoomSellerPriceManager(Room room)
-	{
-		roomSellerGui.removeRoom(room);
-		RoomSellerPriceManager priceManager = priceManagers.remove(room);
-		if (priceManager != null)
-			removeBehaviour(priceManager);
-	}
-
-	public void updatePriceForRoom(Room room, int currentPrice)
-	{
-		roomSellerGui.updatePriceForRoom(room, currentPrice);
 	}
 
 }
