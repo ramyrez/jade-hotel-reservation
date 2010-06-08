@@ -1,6 +1,3 @@
-/**
- * Section 4.2.5.2, Page 63
- **/
 package com.cooperative.hotelreservation.seller;
 
 import jade.content.lang.Codec;

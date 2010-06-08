@@ -1,7 +1,3 @@
-/**
- * definition of the RoomRentGui interface
- **/
-
 package com.cooperative.hotelreservation.rent;
 
 import java.awt.Container;
