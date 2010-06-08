@@ -1,6 +1,3 @@
-/**
- * skeleton of the Book-BuyerAgent class.
- **/
 package com.cooperative.hotelreservation.rent;
 
 import jade.content.lang.Codec;
